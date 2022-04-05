@@ -1,0 +1,80 @@
+#include <iostream>
+
+using namespace std;
+
+char board[19][19];
+
+
+void set_Board(char board[19][19]);
+void print_Board(char board[19][19]);
+void insert_Stone(char board[19][19]);
+
+int main()
+{
+	set_Board(board);
+	print_Board(board);
+	insert_Stone(board);
+}
+
+void set_Board(char board[19][19])
+{
+	for (int i = 0; i < 19; i++)
+	{
+		for (int j = 0; j < 19; j++)
+		{
+			board[j][i] = '*';
+		}
+	}
+}
+
+void print_Board(char board[19][19])
+{
+	for (int i = 0; i < 19; i++)
+	{
+		for (int j = 0; j < 19; j++)
+		{
+			cout << board[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+void insert_Stone(char board[19][19])
+{
+	int count = 0, col = 0, row = 0, bCount = 0, wCount = 0;
+	while (true)
+	{
+		if (count % 2 == 0)
+			cout << "흑돌(o)의 차례입니다. 돌을 놓아주세요(x,y) : ";
+		else
+			cout << "백돌(x)의 차례입니다. 돌을 놓아주세요(x,y) : ";
+
+		cin >> row >> col;
+		if (board[col][row] == 'o' || board[col][row] == 'x') {
+			cout << "이미 돌이 놓여있습니다. 다시 입력해주세요" << endl;
+			continue;
+		}
+		else if (cin.fail()) {
+			cout << "잘못된 입력이 입력되었습니다. 다시 입력해주세요" << endl;
+			cin.clear();
+			rewind(stdin);
+			continue;
+		}
+		else if (row < 0 || row > 18 || col < 0 || row > 18) {
+			cout << "잘못된 범위의 숫자가 입력되었습니다. 다시 입력해주세요" << endl;
+			continue;
+		}
+		if (count % 2 == 0) {
+			board[col][row] = 'o';
+			count++;
+			bCount++;
+		}			
+		else {
+			board[col][row] = 'x';
+			count++;
+			wCount++;
+		}
+		cout << "흑돌: " << bCount << " 백돌: " << wCount << endl;
+		print_Board(board);
+	}
+}
