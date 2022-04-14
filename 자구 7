@@ -1,0 +1,359 @@
+#include <iostream>
+#include <Windows.h>
+
+using namespace std;
+
+#define SIZE 20
+
+typedef struct {
+	char name[20];
+	int hp;
+	int mp;
+	int speed;
+	int range;
+	char position[20];
+} Champ;
+
+
+typedef struct Node {
+	Champ data;
+	Node* next;
+}Node;
+
+Node arr[SIZE]{
+	{"가렌", 620, 0, 340, 175, "top"},
+	{"갈리오", 562, 500, 335, 125, "mid"},
+	{"베인", 515, 231, 330, 550, "bot"},
+	{"티모", 528, 267, 330, 500, "top"},
+	{"소라카", 535, 425, 325, 550, "support"},
+	{"녹턴", 585, 275, 345, 125, "jungle"},
+	{"블리츠크랭크", 582, 267, 325, 125, "support"},
+	{"퀸", 532, 268, 335, 525, "top"},
+	{"아펠리오스", 620, 0, 350, 500, "bot"},
+	{"시비르", 530, 300, 325, 350, "bot"},
+	{"모르가나", 500, 350, 320, 550,  "support"},
+	{"코르키", 550, 450, 125, 330, "mid"},
+	{"리신", 619, 0, 350, 250, "jungle"},
+	{"레나타 글라스크", 500, 235, 330, 125, "support"},
+	{"르블랑", 500, 340, 330, 500, "mid"},
+	{"바드", 490, 300, 330, 300, "support"},
+	{"바루스", 510, 250, 345, 570, "bot"},
+	{"쉔", 620, 0, 330, 200, "top"},
+	{"애쉬", 500, 350, 330, 500, "bot"},
+	{"라이즈", 550, 400, 325, 400, "mid"}
+};
+
+Node* Tail;
+
+void Menu();
+void linked_List();
+void search_List(bool isFind);
+void insert_List();
+void deleteChamp_List(bool isFind);
+void deletePosition_List(bool isFind);
+void print_List();
+void maxHp_List();
+void sortByHp_List();
+
+int main()
+{
+	linked_List();
+	Menu();
+}
+
+void Menu()
+{
+	system("cls");
+	while (true) {
+		system("cls");
+		cout << "0 : 시스템 종료" << endl;
+		cout << "1 : 챔피언 검색" << endl;
+		cout << "2 : 챔피언 추가" << endl;
+		cout << "3 : 챔피언 삭제" << endl;
+		cout << "4 : 포지션 삭제" << endl;
+		cout << "5 : 챔피언 출력" << endl;
+		cout << "6 : 최대 체력인 챔피언 출력" << endl;
+		cout << "7 : 체력순으로 정렬" << endl;
+		int switch_Number;
+		cout << "검색 : ";
+		rewind(stdin);
+		cin >> switch_Number;
+		if (cin.fail()) {
+			cout << "숫자가 아닌 문자가 입력되었습니다." << endl;
+			system("pause");
+			cin.clear();
+			rewind(stdin);
+			continue;
+		}
+		switch (switch_Number)
+		{
+		case 0:
+			cout << "프로그램을 종료합니다." << endl;
+			exit(1);
+		case 1:
+			search_List(false);
+			system("pause");
+			break;
+		case 2:
+			insert_List();
+			system("pause");
+			break;
+		case 3:
+			deleteChamp_List(false);
+			system("pause");
+			break;
+		case 4:
+			deletePosition_List(false);
+			system("pause");
+			break;
+		case 5:
+			print_List();
+			system("pause");
+			break;
+		case 6:
+			maxHp_List();
+			system("pause");
+			break;
+		case 7:
+			sortByHp_List();
+			system("pause");
+			break;
+		default:
+			cout << "잘못된 범위의 숫자가 입력되었습니다. 다시 입력해주세요" << endl;
+			system("pause");
+			continue;
+		}
+	}
+}
+
+void linked_List()
+{
+	for (int i = 0; i < SIZE; i++)
+	{
+		Node* node = new Node;
+		if (Tail == NULL) {
+			node->data = arr[i].data;
+			node->next = Tail;
+			Tail = node;
+			node->next = Tail;
+		}
+		else {
+			node->data = arr[i].data;
+			node->next = Tail->next;
+			Tail->next = node;
+			Tail = node;
+		}
+	}
+}
+
+void search_List(bool isFind)
+{
+	system("cls");
+	Node* Target = Tail;
+	char search_Name[20];
+	cout << "검색할 챔피언의 이름을 입력하시오 : ";
+	rewind(stdin);
+	cin >> search_Name;
+	do 
+	{
+		if (!strcmp(search_Name, Target->data.name)) {
+			isFind = true;
+			cout << "name : " << Target->data.name << endl;
+			cout << "hp : " << Target->data.hp << endl;
+			cout << "mp : " << Target->data.mp << endl;
+			cout << "speed : " << Target->data.speed << endl;
+			cout << "range : " << Target->data.range << endl;
+			cout << "position : " << Target->data.position << endl;
+			Target = Target->next;
+		}
+		else 
+			Target = Target->next;
+	} while (Target->next != Tail);
+	if (!isFind)
+		cout << "없는 챔피언입니다." << endl;
+}
+
+void insert_List()
+{
+	system("cls");
+	Node* new_node = new Node;
+	cout << "추가할 챔피언의 정보를 입력하시오" << endl;
+	cout << "name : ";
+	rewind(stdin);
+	cin >> new_node->data.name;
+	cout << "hp : ";
+	rewind(stdin);
+	cin >> new_node->data.hp;
+	if (cin.fail()) {
+		cout << "숫자가 아닌 문자가 입력되었습니다." << endl;
+		cin.clear();
+		rewind(stdin);
+		return;
+	}
+	cout << "mp : ";
+	rewind(stdin);
+	cin >> new_node->data.mp;
+	if (cin.fail()) {
+		cout << "숫자가 아닌 문자가 입력되었습니다." << endl;
+		cin.clear();
+		rewind(stdin);
+		return;
+	}
+	cout << "speed : ";
+	rewind(stdin);
+	cin >> new_node->data.speed;
+	if (cin.fail()) {
+		cout << "숫자가 아닌 문자가 입력되었습니다." << endl;
+		cin.clear();
+		rewind(stdin);
+		return;
+	}
+	cout << "range : ";
+	rewind(stdin);
+	cin >> new_node->data.range;
+	if (cin.fail()) {
+		cout << "숫자가 아닌 문자가 입력되었습니다." << endl;
+		cin.clear();
+		rewind(stdin);
+		return;
+	}
+	cout << "position : ";
+	rewind(stdin);
+	cin >> new_node->data.position;
+	cout << new_node->data.name << " 입력 완료" << endl;
+	new_node->next = Tail->next;
+	Tail->next = new_node;
+	Tail = new_node;
+}
+
+void deleteChamp_List(bool isFind)
+{
+	system("cls");
+	Node* Target = Tail;
+	Node* temp;
+	char delete_Name[20];
+	cout << "삭제할 챔피언의 이름을 입력하시오 : ";
+	rewind(stdin);
+	cin >> delete_Name;
+	do
+	{
+		if (!strcmp(delete_Name, Target->next->data.name)) {
+			isFind = true;
+			if (Target->next == Tail) {
+				temp = Target->next;
+				Target->next = Target->next->next;
+				cout << temp->data.name << " 삭제 완료" << endl;
+				delete temp;
+				Tail = Target;
+				Target = Target->next;
+			}
+			else {
+				temp = Target->next;
+				Target->next = Target->next->next;
+				cout << temp->data.name << " 삭제 완료" << endl;
+				delete temp;
+				Target = Target->next;
+			}
+		}
+		else 
+			Target = Target->next;
+	} while (Target != Tail);
+	if (!isFind)
+		cout << "없는 챔피언입니다." << endl;
+}
+
+void deletePosition_List(bool isFind)
+{
+	system("cls");
+	Node* Target = Tail;
+	Node* temp;
+	char delete_Name[20];
+	cout << "삭제할 포지션의 이름을 입력하시오 : ";
+	rewind(stdin);
+	cin >> delete_Name;
+	do
+	{
+		if (!strcmp(delete_Name, Target->next->data.position)) {
+			isFind = true;
+			if (Target->next == Tail) {
+				temp = Target->next;
+				Target->next = Target->next->next;
+				cout << temp->data.name << " 삭제 완료" << endl;
+				delete temp;
+				Tail = Target;
+				Target = Target->next;
+			}
+			else {
+				temp = Target->next;
+				Target->next = Target->next->next;
+				cout << temp->data.name << " 삭제 완료" << endl;
+				delete temp;
+				Target = Target->next;
+			}
+		}
+		else
+			Target = Target->next;
+	} while (Target != Tail);
+	if (!isFind)
+		cout << "없는 포지션입니다." << endl;
+}
+
+void print_List()
+{
+	system("cls");
+	Node* Target = Tail;
+	cout << Tail->data.name << endl;
+	do {
+		Target = Target->next;
+		cout << "name : " << Target->data.name << endl;
+		cout << "hp : " << Target->data.hp << endl;
+		cout << "mp : " << Target->data.mp << endl;
+		cout << "speed : " << Target->data.speed << endl;
+		cout << "range : " << Target->data.range << endl;
+		cout << "position : " << Target->data.position << endl;
+	} while (Target != Tail);
+}
+
+void maxHp_List()
+{
+	int maxHp = 0;
+	Node* Target = Tail;
+	maxHp = Target->data.hp;
+	while (Target->next != Tail)
+	{
+		if (maxHp < Target->next->data.hp)
+			maxHp = Target->next->data.hp;
+		Target = Target->next;
+	}
+	Target = Target->next;
+	do {
+		if (Target->next->data.hp == maxHp) {
+			cout << "name : " << Target->next->data.name << endl;
+			cout << "hp : " << Target->next->data.hp << endl;
+			cout << "mp : " << Target->next->data.mp << endl;
+			cout << "speed : " << Target->next->data.speed << endl;
+			cout << "range : " << Target->next->data.range << endl;
+			cout << "position : " << Target->next->data.position << endl;
+			Target = Target->next;
+		}
+		else
+			Target = Target->next;
+	} while (Target != Tail);	 
+}
+
+void sortByHp_List()
+{
+	Champ temp;
+	for (Node* node1 = Tail; node1->next != Tail; node1 = node1->next)
+	{
+		for (Node* node2 = Tail->next; node2->next != Tail->next; node2 = node2->next)
+		{
+			if (node2->data.hp < node2->next->data.hp) {
+				temp = node2->next->data;
+				node2->next->data = node2->data;
+				node2->data = temp;
+			}			
+		}
+	}
+	cout << "정렬 완료" << endl;
+}
