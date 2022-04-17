@@ -1,0 +1,213 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+typedef struct Node {
+	int x;
+	int y;
+	bool count;
+	Node* next;
+};
+
+void set_Board(char board[19][19]); //판 설정
+void print_Board(char board[19][19]); //판 출력
+void insert_Stone(Node* Head, Node* Head2, char board[19][19]); //돌 입력 및 실행
+void stack(Node** Head, int row, int col, bool count); //
+void input_File(char board[19][19] , bool count);
+void output_File(char board[19][19], bool* count);
+void go_Stack(char board[19][19], Node** Head, Node** Head2, int x, int y, bool* count);
+void back_Stack(char board[19][19], Node** Head, Node** Head2, int x, int y, bool* count);
+
+int main()
+{
+	Node* new_node = new Node;
+	Node* Head = new Node;
+	Node* Head2 = new Node;
+	char board[19][19] = { 0 };		
+	set_Board(board);
+	print_Board(board);
+	insert_Stone(Head, Head2, board);
+}
+
+void set_Board(char board[19][19])
+{
+	for (int i = 0; i < 19; i++)
+	{
+		for (int j = 0; j < 19; j++)
+		{
+			board[j][i] = '*';
+		}
+	}
+}
+
+void print_Board(char board[19][19])
+{
+	for (int i = 0; i < 19; i++)
+	{
+		for (int j = 0; j < 19; j++)
+		{
+			cout << board[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+void insert_Stone(Node* Head, Node* Head2, char board[19][19])
+{
+	int col = 0, row = 0, bCount = 0, wCount = 0;
+	bool count = true;
+	bool err_Count = true;
+	while (1)
+	{
+		err_Count = false;
+		while (err_Count == false) {
+			err_Count = true;
+			if (count == true)
+				cout << "흑돌(o)의 차례입니다. 돌을 놓아주세요(x,y) : ";
+			else
+				cout << "백돌(x)의 차례입니다. 돌을 놓아주세요(x,y) : ";
+			cin >> row >> col;
+			if (board[col][row] == 'o' || board[col][row] == 'x') {
+				cout << "이미 돌이 놓여있습니다. 다시 입력해주세요" << endl;
+				continue;
+			}
+			else if (cin.fail()) {
+				cout << "잘못된 입력이 입력되었습니다. 다시 입력해주세요" << endl;
+				cin.clear();
+				rewind(stdin);
+				continue;
+			}
+			else if (row < 0 || row > 18 || col < 0 || row > 18) {
+				cout << "잘못된 범위의 숫자가 입력되었습니다. 다시 입력해주세요" << endl;
+				continue;
+			}
+			if (err_Count == true && count == true) {
+				board[col][row] = 'o';
+				count = false; 
+			}
+			else if (err_Count == true && count == false) {
+				board[col][row] = 'x';
+				count = true; 
+			}
+		}
+		print_Board(board);
+		stack(&Head, row, col, count);
+		while (1)
+		{
+			cout << "0.입력 1.저장 2.가져오기 3.무르기(u) 4.무르기취소(r) : ";
+			char insert = 0;
+			rewind(stdin);
+			cin >> insert;
+			switch (insert)
+			{
+			case 0:
+				break;
+			case '1':
+				input_File(board, count);
+				break;
+			case '2':
+				output_File(board, &count);
+				break;
+			case 'u':
+				go_Stack(board, &Head, &Head2, row, col, &count);
+				break;
+			case 'U':
+				go_Stack(board, &Head, &Head2, row, col, &count);
+				break;
+			case 'r':
+				back_Stack(board, &Head, &Head2, row, col, &count);
+				break;
+			case 'R':
+				back_Stack(board, &Head, &Head2, row, col, &count);
+				break;
+			default:
+				cout << "잘못된 문자가 입력되었습니다." << endl;
+				break;
+			}
+			print_Board(board);
+			if (insert == '0')
+				break;
+		}
+	}	
+}
+
+void stack(Node** Head, int row, int col, bool count)
+{
+	Node* new_node = new Node;
+	new_node->x = row;
+	new_node->y = col;
+	new_node->count = count;
+	new_node->next = *Head;
+	*Head = new_node;
+}
+
+void input_File(char board[19][19], bool count)
+{
+	ofstream input("save_Board.txt");
+	if (input.is_open()) {
+		for (int col = 0; col < 19; col++)
+		{
+			for (int row = 0; row < 19; row++)
+			{
+				input << board[col][row] << ' ';
+			}
+			input << "\n";
+		}
+		input << count;
+	}
+}
+
+void output_File(char board[19][19], bool* count)
+{
+	ifstream output("save_Board.txt");
+	if (output.is_open()) {
+		for (int col = 0; col < 19; col++)
+		{
+			for (int row = 0; row < 19; row++)
+			{
+				output >> board[col][row];
+			}			
+		}
+		output >> *count;
+	}
+}
+
+void go_Stack(char board[19][19], Node** Head, Node** Head2, int x, int y, bool *count)
+{
+	Node* new_node = NULL;
+	new_node = *Head;
+	cout << *Head << endl;
+	if (new_node->next != NULL) {
+		*Head = new_node->next;
+		new_node->next = *Head2;
+		*Head2 = new_node;
+		cout << Head2 << " " << new_node << endl;
+		board[new_node->y][new_node->x] = '*';
+		if (*count == true)
+			*count = false;
+		else if (*count == false)
+			*count = true;
+	}	
+}
+
+void back_Stack(char board[19][19], Node** Head, Node** Head2, int x, int y, bool* count)
+{
+	Node* new_node = NULL;
+	new_node = *Head2;
+	if (new_node->next != NULL) {
+		*Head2 = new_node->next;
+		new_node->next = *Head;
+		*Head = new_node;
+		if (*count == true) {
+			board[new_node->y][new_node->x] = 'o';
+			*count = false;
+		}
+		else if (*count == false) {
+			board[new_node->y][new_node->x] = 'x';
+			*count = true;
+		}
+	}
+}
+
+
