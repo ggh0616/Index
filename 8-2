@@ -1,0 +1,229 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+typedef struct Node {
+	int row;
+	int col;
+	int count;
+	int uCount;
+	Node* next;
+};
+
+void set_Board(char board[19][19]);
+void print_Board(char board[19][19]);
+void insert_Stone(char board[19][19], Node* Head, Node* Head2);
+void stack_Stone(char board[19][19], Node** Head, int row, int col, int* count, int*uCount);
+void insert_Data(char board[19][19], int* count);
+void load_Data(char board[19][19], int* count);
+void cancel_Stone(char board[19][19], Node** Head, Node** Head2, int row, int col, int* count, int* uCount);
+void undo_Stone(char board[19][19], Node** Head, Node** Head2, int row, int col, int* count, int* uCount);
+
+int main()
+{
+	char board[19][19];
+	Node* Head = new Node;
+	Node* Head2 = new Node;
+	Node* new_node = new Node;
+	char del_File[] = { "C:save.txt" };
+	int nResult = remove(del_File);
+	set_Board(board);
+	print_Board(board);
+	insert_Stone(board, Head, Head2);
+}
+
+void set_Board(char board[19][19])
+{
+	for (int i = 0; i < 19; i++)
+	{
+		for (int j = 0; j < 19; j++)
+		{
+			board[j][i] = '*';
+		}
+	}
+}
+
+void print_Board(char board[19][19])
+{
+	for (int i = 0; i < 19; i++)
+	{
+		for (int j = 0; j < 19; j++)
+		{
+			cout << board[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+void insert_Stone(char board[19][19], Node* Head, Node* Head2)
+{
+	int count = 0, uCount = 0, col = 0, row = 0;
+	while (1)
+	{
+		while (1)
+		{
+			if (count % 2 == 0)
+				cout << "흑돌(o)의 차례입니다. 돌을 놓아주세요(x,y) : ";
+			else
+				cout << "백돌(x)의 차례입니다. 돌을 놓아주세요(x,y) : ";
+
+			cin >> row >> col;
+			if (board[col][row] == 'o' || board[col][row] == 'x') {
+				cout << "이미 돌이 놓여있습니다. 다시 입력해주세요" << endl;
+				continue;
+			}
+			else if (cin.fail()) {
+				cout << "잘못된 입력이 입력되었습니다. 다시 입력해주세요" << endl;
+				cin.clear();
+				rewind(stdin);
+				continue;
+			}
+			else if (row < 0 || row > 18 || col < 0 || row > 18) {
+				cout << "잘못된 범위의 숫자가 입력되었습니다. 다시 입력해주세요" << endl;
+				continue;
+			}
+			if (count % 2 == 0) {
+				board[col][row] = 'o';
+				count++;
+				break;
+			}
+			else {
+				board[col][row] = 'x';
+				count++;
+				break;
+			}
+		}
+		print_Board(board);
+		stack_Stone(board, &Head, row, col, &count, &uCount);
+		while (1)
+		{
+			cout << "0.종료 1.저장 2.가져오기 U.무르기 R.무르기 취소 5.돌놓기 : ";
+			char insert = 0;
+			rewind(stdin);
+			cin >> insert;
+			switch (insert)
+			{
+			case '0':
+				cout << "시스템을 종료합니다." << endl;
+				exit(1);
+			case '1':
+				insert_Data(board, &count);
+				break;
+			case '2':
+				load_Data(board, &count);
+				break;
+			case 'u':
+				cancel_Stone(board, &Head, &Head2, row, col, &count, &uCount);
+				break;
+			case 'U':
+				cancel_Stone(board, &Head, &Head2, row, col, &count, &uCount);
+				break;
+			case 'r':
+				undo_Stone(board, &Head, &Head2, row, col, &count, &uCount);
+				break;
+			case 'R':
+				undo_Stone(board, &Head, &Head2, row, col, &count, &uCount);
+				break;
+			case '5':
+				break;
+			default:
+				cout << "잘못된 문자가 입력되었습니다. 다시 입력해주세요" << endl;
+				continue;
+			}
+			print_Board(board);
+			if (insert == '5')
+				break;
+		}
+	}
+}
+
+void stack_Stone(char board[19][19], Node** Head, int row, int col, int* count, int *uCount)
+{
+	Node* new_node = new Node;
+	new_node->row = row;
+	new_node->col = col;
+	new_node->count = *count;
+	new_node->uCount = *uCount;
+	new_node->next = *Head;
+	*Head = new_node;
+}
+
+void insert_Data(char board[19][19], int* count)
+{
+	ofstream insert("save.txt");
+	if (insert.is_open()) {
+		for (int i = 0; i < 19; i++)
+		{
+			for (int j = 0; j < 19; j++)
+			{
+				insert << board[i][j];
+			}
+			insert << endl;
+		}
+		insert << *count;
+	}
+	insert.close();
+}
+
+void load_Data(char board[19][19], int* count)
+{
+	ifstream out("save.txt");
+	if (!out)
+		cout << "파일이 존재하지 않습니다." << endl;
+	else if (out.is_open()) {
+		for (int i = 0; i < 19; i++)
+		{
+			for (int j = 0; j < 19; j++)
+			{
+				out >> board[i][j];
+			}
+		}
+		out >> *count;
+	}
+	out.close();
+}
+
+void cancel_Stone(char board[19][19], Node** Head, Node** Head2, int row, int col, int* count, int *uCount)
+{
+	Node* new_node = NULL;
+	new_node = *Head;
+
+	if (*count == 0) {
+		cout << "값이 없습니다." << endl;
+		return;
+	}	
+	else if (new_node->next != NULL) {
+		*Head = new_node->next;
+		new_node->next = *Head2;
+		*Head2 = new_node;
+		board[new_node->col][new_node->row] = '*';
+		*count = *count - 1;
+		*uCount = *uCount + 1;
+	}
+}
+
+void undo_Stone(char board[19][19], Node** Head, Node** Head2, int row, int col, int* count, int *uCount)
+{
+	Node* new_node = NULL;
+	new_node = *Head2;
+	if (*uCount < 1) {
+		cout << "무르기가 존재하지 않습니다." << endl;
+		return;
+	}
+	else if (new_node->next != NULL) {
+		*Head2 = new_node->next;
+		new_node->next = *Head;
+		*Head = new_node;
+		if (*count % 2 == 0) {
+			board[new_node->col][new_node->row] = 'o';
+			*count = *count + 1;
+			*uCount = *uCount - 1;
+		}			
+		else if (*count % 2 == 1) {
+			board[new_node->col][new_node->row] = 'x';
+			*count = *count + 1;
+			*uCount = *uCount - 1;
+		}
+	}
+}
