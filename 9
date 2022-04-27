@@ -162,10 +162,9 @@ void row_Conti(char board[19][19], bool hole, max_Stone* Line)
 		for (int row = 0; row < 19; row++)
 		{
 			first_row = 0, first_col = 0, last_row = 0;
-			bConti = 0;
-			wConti = 0;
+			/*bConti = 0;
+			wConti = 0;*/
 			if (board[col][row] == 'o') {
-				cout << row << endl;
 				bConti = 1;
 				hole = false;
 				if (max_B[col] < bConti)
@@ -204,11 +203,11 @@ void row_Conti(char board[19][19], bool hole, max_Stone* Line)
 						}
 					}
 					else if (board[col][rowW] == '*' && hole == false)
-						hole = true;											
+						hole = true;
 					else if (board[col][rowW] == 'o' && hole == true) {
 						bConti++;
 						if (board[col][rowW - 1] == '*')
-							bConti++;			
+							bConti++;
 						if (max_B[col] < bConti)
 							max_B[col] = bConti;
 						if (Line->length_rowB < max_B[col]) {
@@ -219,15 +218,12 @@ void row_Conti(char board[19][19], bool hole, max_Stone* Line)
 						if (Line->fi_Line[0] < Line->length_rowB) {
 							Line->fi_Line[0] = Line->length_rowB;
 							Line->fi_X[0] = Line->row_xB;
-							Line->fi_Y[0] = Line->row_yB; 
+							Line->fi_Y[0] = Line->row_yB;
 							Line->fi_Stone[0] = 'o';
 						}
 					}
 					else if (board[col][rowW] == '*' && hole == true) {
-						/*cout << bConti << endl;
-						cout << rowW << endl;*/
 						row = rowW - bConti;
-						/*cout << row << endl;*/
 						break;
 					}
 					else {
@@ -236,33 +232,33 @@ void row_Conti(char board[19][19], bool hole, max_Stone* Line)
 					}
 					rowW++;
 				}
-				cout << row << " " << bConti << endl;
 				if (bConti == 3) {
 					last_row = first_row + bConti;
-					if (board[first_col][first_row - 1] == 'x')
+					if (board[first_col][first_row - 1] != '*' || first_row == 0)
 						cout << "last_row: " << "(" << last_row << "," << first_col << ")" << endl;
-					else if (first_row - 1 < 0)
-						cout << "last_row: " << "(" << last_row << "," << first_col << ")" << endl;
-					else if (last_row > 18)
-						cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << endl;
-					else if (board[first_col][last_row + 1] == 'x')
+					else if (board[first_col][last_row] != '*' || last_row == 18)
 						cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << endl;
 					else
 						cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << " last_row: " << "(" << last_row << "," << first_col << ")" << endl;
 					while (first_row < last_row)
-					{			
+					{
 						if (board[first_col][first_row] == '*')
-							cout << "(" << first_row << "," << first_col << ")" << endl;						
+							cout << "middle_row: " << "(" << first_row << "," << first_col << ")" << endl;
 						first_row++;
-					}				
-				}					
-				else if (bConti == 4&& first_row > 0) {
+					}
+				}
+				else if (bConti == 4) {
 					last_row = first_row + bConti;
-					cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << " last_row: " << "(" << last_row << "," << first_col << ")" << endl;
+					if (board[first_col][first_row - 1] != '*' || first_row == 0)
+						cout << "last_row: " << "(" << last_row << "," << first_col << ")" << endl;
+					else if (board[first_col][last_row] != '*' || last_row == 18)
+						cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << endl;
+					else
+						cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << " last_row: " << "(" << last_row << "," << first_col << ")" << endl;
 					while (first_row < last_row)
 					{
 						if (board[first_col][first_row] == '*')
-							cout << "(" << first_row << "," << first_col << ")" << endl;
+							cout << "middle_row: " << "(" << first_row << "," << first_col << ")" << endl;
 						first_row++;
 					}
 				}
@@ -283,6 +279,8 @@ void row_Conti(char board[19][19], bool hole, max_Stone* Line)
 					Line->fi_Y[0] = Line->row_yW;
 					Line->fi_Stone[0] = 'x';
 				}
+				first_row = row;
+				first_col = col;
 				int rowW = row + 1;
 				while (rowW < 19)
 				{
@@ -323,7 +321,7 @@ void row_Conti(char board[19][19], bool hole, max_Stone* Line)
 						}
 					}
 					else if (board[col][rowW] == '*' && hole == true) {
-						row = rowW - 2; //for문에서 ++되기 때문에 다시 뒤로f
+						row = rowW - wConti; //for문에서 ++되기 때문에 다시 뒤로f
 						break;
 					}
 					else {
@@ -332,7 +330,36 @@ void row_Conti(char board[19][19], bool hole, max_Stone* Line)
 					}
 					rowW++;
 				}
-				
+				if (wConti == 3) {
+					last_row = first_row + wConti;
+					if (board[first_col][first_row - 1] != '*' || first_row == 0)
+						cout << "last_row: " << "(" << last_row << "," << first_col << ")" << endl;
+					else if (board[first_col][last_row] != '*' || last_row == 18)
+						cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << endl;
+					else
+						cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << " last_row: " << "(" << last_row << "," << first_col << ")" << endl;
+					while (first_row < last_row)
+					{
+						if (board[first_col][first_row] == '*')
+							cout << "middle_row: " << "(" << first_row << "," << first_col << ")" << endl;
+						first_row++;
+					}
+				}
+				else if (wConti == 4) {
+					last_row = first_row + wConti;
+					if (board[first_col][first_row - 1] != '*' || first_row == 0)
+						cout << "last_row: " << "(" << last_row << "," << first_col << ")" << endl;
+					else if (board[first_col][last_row] != '*' || last_row == 18)
+						cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << endl;
+					else
+						cout << "first_row: " << "(" << first_row - 1 << "," << first_col << ")" << " last_row: " << "(" << last_row << "," << first_col << ")" << endl;
+					while (first_row < last_row)
+					{
+						if (board[first_col][first_row] == '*')
+							cout << "middle_row: " << "(" << first_row << "," << first_col << ")" << endl;
+						first_row++;
+					}
+				}
 			}
 		}
 		if (max_W[col] > 1 || max_B[col] > 1) {
@@ -348,7 +375,7 @@ void row_Conti(char board[19][19], bool hole, max_Stone* Line)
 
 void col_Conti(char board[19][19], bool hole, max_Stone* Line)
 {
-	int bConti = 0, wConti = 0, max_B[19] = { 0 }, max_W[19] = { 0 };
+	int bConti = 0, wConti = 0, first_row = 0, first_col = 0, last_col = 0, max_B[19] = { 0 }, max_W[19] = { 0 };
 	for (int row = 0; row < 19; row++)
 	{
 		bConti = 0;
@@ -357,8 +384,8 @@ void col_Conti(char board[19][19], bool hole, max_Stone* Line)
 		max_W[row] = 0;
 		for (int col = 0; col < 19; col++)
 		{
-			bConti = 0;
-			wConti = 0;
+			/*bConti = 0;
+			wConti = 0;*/
 			if (board[col][row] == 'o') {
 				hole = false;
 				bConti = 1;
@@ -375,6 +402,8 @@ void col_Conti(char board[19][19], bool hole, max_Stone* Line)
 					Line->fi_Y[1] = Line->col_yB;
 					Line->fi_Stone[1] = 'o';
 				}
+				first_row = row;
+				first_col = col;
 				int colL = col + 1;
 				while (colL < 19)
 				{
@@ -415,7 +444,7 @@ void col_Conti(char board[19][19], bool hole, max_Stone* Line)
 						}
 					}
 					else if (board[colL][row] == '*' && hole == true) {
-						col = colL - 2;
+						col = colL - bConti;
 						break;
 					}
 					else {
@@ -423,6 +452,36 @@ void col_Conti(char board[19][19], bool hole, max_Stone* Line)
 						break;
 					}
 					colL++;
+				}
+				if (bConti == 3) {
+					last_col = first_col + bConti;
+					if (board[first_col - 1][first_row] != '*' || first_col == 0)
+						cout << "last_col: " << "(" << first_row << "," << last_col << ")" << endl;
+					else if (board[last_col][first_row] != '*' || last_col == 18)
+						cout << "first_col: " << "(" << first_row << "," << first_col - 1 << ")" << endl;
+					else
+						cout << "first_col: " << "(" << first_row << "," << first_col - 1 << ")" << " last_col: " << "(" << first_row << "," << last_col << ")" << endl;
+					while (first_col < last_col)
+					{
+						if (board[first_col][first_row] == '*')
+							cout << "middle_col: " << "(" << first_row << "," << first_col << ")" << endl;
+						first_col++;
+					}
+				}
+				else if (bConti == 4) {
+					last_col = first_col + bConti;
+					if (board[first_col - 1][first_row] != '*' || first_col == 0)
+						cout << "last_col: " << "(" << first_row << "," << last_col << ")" << endl;
+					else if (board[last_col][first_row] != '*' || last_col == 18)
+						cout << "first_col: " << "(" << first_row << "," << first_col - 1 << ")" << endl;
+					else
+						cout << "first_col: " << "(" << first_row << "," << first_col - 1 << ")" << " last_col: " << "(" << first_row << "," << last_col << ")" << endl;
+					while (first_col < last_col)
+					{
+						if (board[first_col][first_row] == '*')
+							cout << "middle_col: " << "(" << first_row << "," << first_col << ")" << endl;
+						first_col++;
+					}
 				}
 			}
 			else if (board[col][row] == 'x') {
@@ -441,6 +500,8 @@ void col_Conti(char board[19][19], bool hole, max_Stone* Line)
 					Line->fi_Y[1] = Line->col_yW;
 					Line->fi_Stone[1] = 'x';
 				}
+				first_row = row;
+				first_col = col;
 				int colL = col + 1;
 				while (colL < 19)
 				{
@@ -481,7 +542,7 @@ void col_Conti(char board[19][19], bool hole, max_Stone* Line)
 						}
 					}
 					else if (board[colL][row] == '*' && hole == true) {
-						col = colL - 2;
+						col = colL - wConti;
 						break;
 					}
 					else {
@@ -489,6 +550,36 @@ void col_Conti(char board[19][19], bool hole, max_Stone* Line)
 						break;
 					}
 					colL++;
+				}
+				if (wConti == 3) {
+					last_col = first_col + wConti;
+					if (board[first_col - 1][first_row] != '*' || first_col == 0)
+						cout << "last_col: " << "(" << first_row << "," << last_col << ")" << endl;
+					else if (board[last_col][first_row] != '*' || last_col == 18)
+						cout << "first_col: " << "(" << first_row << "," << first_col - 1 << ")" << endl;
+					else
+						cout << "first_col: " << "(" << first_row << "," << first_col - 1 << ")" << " last_col: " << "(" << first_row << "," << last_col << ")" << endl;
+					while (first_col < last_col)
+					{
+						if (board[first_col][first_row] == '*')
+							cout << "middle_col: " << "(" << first_row << "," << first_col << ")" << endl;
+						first_col++;
+					}
+				}
+				else if (wConti == 4) {
+					last_col = first_col + wConti;
+					if (board[first_col - 1][first_row] != '*' || first_col == 0)
+						cout << "last_col: " << "(" << first_row << "," << last_col << ")" << endl;
+					else if (board[last_col][first_row] != '*' || last_col == 18)
+						cout << "first_col: " << "(" << first_row << "," << first_col - 1 << ")" << endl;
+					else
+						cout << "first_col: " << "(" << first_row << "," << first_col - 1 << ")" << " last_col: " << "(" << first_row << "," << last_col << ")" << endl;
+					while (first_col < last_col)
+					{
+						if (board[first_col][first_row] == '*')
+							cout << "middle_col: " << "(" << first_row << "," << first_col << ")" << endl;
+						first_col++;
+					}
 				}
 			}
 		}
@@ -505,7 +596,7 @@ void col_Conti(char board[19][19], bool hole, max_Stone* Line)
 
 void row_Diaognal_D(char board[19][19], bool hole, max_Stone* Line)
 {
-	int bConti = 0, wConti = 0, max_B[19] = { 0 }, max_W[19] = { 0 };
+	int bConti = 0, wConti = 0, first_rDDR = 0, first_rDDC = 0, last_rDDR = 0, last_rDDC = 0, max_B[19] = { 0 }, max_W[19] = { 0 };
 	for (int row = 1; row < 19; row++)
 	{
 		bConti = 0;
@@ -534,6 +625,8 @@ void row_Diaognal_D(char board[19][19], bool hole, max_Stone* Line)
 						Line->fi_Y[2] = Line->rDiaD_yB;
 						Line->fi_Stone[2] = 'o';
 					}
+					first_rDDR = rowW;
+					first_rDDC = col;
 					int colT = col + 1;
 					int rowT = rowW - 1;
 					while (colT < 19 && rowT > -1)
@@ -575,12 +668,46 @@ void row_Diaognal_D(char board[19][19], bool hole, max_Stone* Line)
 							}
 						}
 						else if (board[colT][rowT] == '*' && hole == true) {
-							rowW = rowT + 2;
-							col = colT - 2;
+							rowW = rowT + bConti;
+							col = colT - bConti;
 							break;
 						}
 						rowT--;
 						colT++;
+					}
+					if (bConti == 3) {
+						last_rDDR = first_rDDR - bConti;
+						last_rDDC = first_rDDC + bConti;
+						if (board[first_rDDC - 1][first_rDDR + 1] != '*' || first_rDDC == 0 || first_rDDR == 18)
+							cout << "last_rDD: " << "(" << last_rDDR << "," << last_rDDC << ")" << endl;
+						else if (board[last_rDDC][last_rDDR] != '*' || last_rDDC == 18 || last_rDDR == 0)
+							cout << "first_rDD: " << "(" << first_rDDR + 1 << "," << first_rDDC - 1 << ")" << endl;
+						else 
+							cout << "first_rDD: " << "(" << first_rDDR + 1 << "," << first_rDDC - 1 << ")" << " last_rDD: " << "(" << last_rDDR << "," << last_rDDC << ")" << endl;
+						while (first_rDDC < last_rDDC && first_rDDR > last_rDDR)
+						{
+							if (board[first_rDDC][first_rDDR] == '*')
+								cout << "middle_rDD: " << "(" << first_rDDR << "," << first_rDDC << ")" << endl;
+							first_rDDR--;
+							first_rDDC++;
+						}
+					}
+					else if (bConti == 4) {
+						last_rDDR = first_rDDR - bConti;
+						last_rDDC = first_rDDC + bConti;
+						if (board[first_rDDC - 1][first_rDDR + 1] != '*' || first_rDDC == 0 || first_rDDR == 18)
+							cout << "last_rDD: " << "(" << last_rDDR << "," << last_rDDC << ")" << endl;
+						else if (board[last_rDDC][last_rDDR] != '*' || last_rDDC == 18 || last_rDDR == 0)
+							cout << "first_rDD: " << "(" << first_rDDR + 1 << "," << first_rDDC - 1 << ")" << endl;
+						else
+							cout << "first_rDD: " << "(" << first_rDDR + 1 << "," << first_rDDC - 1 << ")" << " last_rDD: " << "(" << last_rDDR << "," << last_rDDC << ")" << endl;
+						while (first_rDDC < last_rDDC)
+						{
+							if (board[first_rDDC][first_rDDR] == '*' && first_rDDR > last_rDDR)
+								cout << "middle_rDD: " << "(" << first_rDDR << "," << first_rDDC << ")" << endl;
+							first_rDDR--;
+							first_rDDC++;
+						}
 					}
 				}
 				else if (board[col][rowW] == 'x') {
@@ -599,6 +726,8 @@ void row_Diaognal_D(char board[19][19], bool hole, max_Stone* Line)
 						Line->fi_Y[2] = Line->rDiaD_yW;
 						Line->fi_Stone[2] = 'x';
 					}
+					first_rDDR = rowW;
+					first_rDDC = col;
 					int colT = col + 1;
 					int rowT = rowW - 1;
 					while (colT < 19 && rowT > -1)
@@ -640,12 +769,46 @@ void row_Diaognal_D(char board[19][19], bool hole, max_Stone* Line)
 							}
 						}
 						else if (board[colT][rowT] == '*' && hole == true) {
-							rowW = rowT + 2;
-							col = colT - 2;
+							rowW = rowT + wConti;
+							col = colT - wConti;
 							break;
 						}
 						rowT--;
 						colT++;
+					}
+					if (wConti == 3) {
+						last_rDDR = first_rDDR - wConti;
+						last_rDDC = first_rDDC + wConti;
+						if (board[first_rDDC - 1][first_rDDR + 1] != '*' || first_rDDC == 0 || first_rDDR == 18)
+							cout << "last_rDD: " << "(" << last_rDDR << "," << last_rDDC << ")" << endl;
+						else if (board[last_rDDC][last_rDDR] != '*' || last_rDDC == 18 || last_rDDR == 0)
+							cout << "first_rDD: " << "(" << first_rDDR + 1 << "," << first_rDDC - 1 << ")" << endl;
+						else
+							cout << "first_rDD: " << "(" << first_rDDR + 1 << "," << first_rDDC - 1 << ")" << " last_rDD: " << "(" << last_rDDR << "," << last_rDDC << ")" << endl;
+						while (first_rDDC < last_rDDC && first_rDDR > last_rDDR)
+						{
+							if (board[first_rDDC][first_rDDR] == '*')
+								cout << "middle_rDD: " << "(" << first_rDDR << "," << first_rDDC << ")" << endl;
+							first_rDDR--;
+							first_rDDC++;
+						}
+					}
+					else if (wConti == 4) {
+						last_rDDR = first_rDDR - wConti;
+						last_rDDC = first_rDDC + wConti;
+						if (board[first_rDDC - 1][first_rDDR + 1] != '*' || first_rDDC == 0 || first_rDDR == 18)
+							cout << "last_rDD: " << "(" << last_rDDR << "," << last_rDDC << ")" << endl;
+						else if (board[last_rDDC][last_rDDR] != '*' || last_rDDC == 18 || last_rDDR == 0)
+							cout << "first_rDD: " << "(" << first_rDDR + 1 << "," << first_rDDC - 1 << ")" << endl;
+						else
+							cout << "first_rDD: " << "(" << first_rDDR + 1 << "," << first_rDDC - 1 << ")" << " last_rDD: " << "(" << last_rDDR << "," << last_rDDC << ")" << endl;
+						while (first_rDDC < last_rDDC)
+						{
+							if (board[first_rDDC][first_rDDR] == '*' && first_rDDR > last_rDDR)
+								cout << "middle_rDD: " << "(" << first_rDDR << "," << first_rDDC << ")" << endl;
+							first_rDDR--;
+							first_rDDC++;
+						}
 					}
 				}
 			}
@@ -663,7 +826,7 @@ void row_Diaognal_D(char board[19][19], bool hole, max_Stone* Line)
 
 void row_Diaognal_U(char board[19][19], bool hole, max_Stone* Line)
 {
-	int bConti = 0, wConti = 0, max_B[19] = { 0 }, max_W[19] = { 0 };
+	int bConti = 0, wConti = 0, first_rDUR = 0, first_rDUC = 0, last_rDUR = 0, last_rDUC = 0, max_B[19] = { 0 }, max_W[19] = { 0 };
 	for (int row = 1; row < 19; row++)
 	{
 		bConti = 0;
@@ -690,6 +853,8 @@ void row_Diaognal_U(char board[19][19], bool hole, max_Stone* Line)
 						Line->fi_Y[3] = Line->rDiaU_yB;
 						Line->fi_Stone[3] = 'o';
 					}
+					first_rDUC = col;
+					first_rDUR = row;
 					int colT = col - 1;
 					int rowT = rowW + 1;
 					while (colT > -1 && rowT < 19)
@@ -731,12 +896,42 @@ void row_Diaognal_U(char board[19][19], bool hole, max_Stone* Line)
 							}
 						}
 						else if (board[colT][rowT] == '*' && hole == true) {
-							rowW = rowT - 2;
-							col = colT + 2;
+							rowW = rowT - bConti;
+							col = colT + bConti;
 							break;
 						}
 						rowT++;
 						colT--;
+					}
+					if (bConti == 3) {
+						if (board[first_rDUC - 1][first_rDUR + 1] != '*' || first_rDUR == 1 || first_rDUC == 18)
+							cout << "last_rDU: " << "(" << last_rDUR << "," << last_rDUC << ")" << endl;
+						else if (board[last_rDUC][last_rDUR] != '*' || last_rDUR == 18 || first_rDUC == 1)
+							cout << "first_rDU: " << "(" << first_rDUR - 1 << "," << first_rDUC + 1 << ")" << endl;
+						else 
+							cout << "first_rDU: " << "(" << first_rDUR - 1 << "," << first_rDUC + 1 << ")" << " last_rDU: " << "(" << last_rDUR << "," << last_rDUC << ")" << endl;
+						while (first_rDUR < last_rDUR && first_rDUC > last_rDUC)
+						{
+							if (board[first_rDUC][first_rDUR] == '*')
+								cout << "middle_rDU: " << "(" << first_rDUR << "," << first_rDUC << ")" << endl;
+							first_rDUR++;
+							first_rDUC--;
+						}
+					}
+					else 2if (bConti == 4) {
+						if (board[first_rDUC - 1][first_rDUR + 1] != '*' || first_rDUR == 1 || first_rDUC == 18)
+							cout << "last_rDU: " << "(" << last_rDUR << "," << last_rDUC << ")" << endl;
+						else if (board[last_rDUC][last_rDUR] != '*' || last_rDUR == 18 || first_rDUC == 1)
+							cout << "first_rDU: " << "(" << first_rDUR - 1 << "," << first_rDUC + 1 << ")" << endl;
+						else
+							cout << "first_rDU: " << "(" << first_rDUR - 1 << "," << first_rDUC + 1 << ")" << " last_rDU: " << "(" << last_rDUR << "," << last_rDUC << ")" << endl;
+						while (first_rDUR < last_rDUR && first_rDUC > last_rDUC)
+						{
+							if (board[first_rDUC][first_rDUR] == '*')
+								cout << "middle_rDU: " << "(" << first_rDUR << "," << first_rDUC << ")" << endl;
+							first_rDUR++;
+							first_rDUC--;
+						}
 					}
 				}
 				else if (board[col][rowW] == 'x') {
