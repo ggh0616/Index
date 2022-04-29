@@ -1,0 +1,654 @@
+#include <iostream>
+
+using namespace std;
+
+char board[19][19];
+
+struct max_Stone {
+	int row_xB = 0, row_yB = 0, row_xW = 0, row_yW = 0, row_lengthB = 0, row_lengthW = 0;
+	int col_xB = 0, col_yB = 0, col_xW = 0, col_yW = 0, col_lengthB = 0, col_lengthW = 0;
+	int rDD_xB = 0, rDD_yB = 0, rDD_xW = 0, rDD_yW = 0, rDD_lengthB = 0, rDD_lengthW = 0;
+	int rDU_xB = 0, rDU_yB = 0, rDU_xW = 0, rDU_yW = 0, rDU_lengthB = 0, rDU_lengthW = 0;
+	int cDD_xB = 0, cDD_yB = 0, cDD_xW = 0, cDD_yW = 0, cDD_lengthB = 0, cDD_lengthW = 0;
+	int cDU_xB = 0, cDU_yB = 0, cDU_xW = 0, cDU_yW = 0, cDU_lengthB = 0, cDU_lengthW = 0;
+	int fi_x[6] = { 0 }, fi_y[6] = { 0 }, fi_length[6] = { 0 };
+	char fi_stone[6] = { 0 };
+};
+
+void set_Board(char board[19][19]);
+void print_Board(char board[19][19]);
+void insert_Stone(char board[19][19]);
+void all_Stone(char board[19][19]);
+void row_Stone(char board[19][19]);
+void col_Stone(char board[19][19]);
+void row_Conti(char board[19][19], bool hole, max_Stone *Line);
+void col_Conti(char board[19][19], bool hole, max_Stone* Line);
+void row_Diaognal_D(char board[19][19], bool hole, max_Stone* Line);
+void row_Diaognal_U(char board[19][19], bool hole, max_Stone* Line);
+void col_Diaognal_D(char board[19][19], bool hole, max_Stone* Line);
+void col_Diaognal_U(char board[19][19], bool hole, max_Stone* Line);
+void final_Line(char board[19][19], max_Stone* Line);
+
+int main()
+{
+	set_Board(board);
+	print_Board(board);
+	insert_Stone(board);
+}
+
+void set_Board(char board[19][19])
+{
+	for (int i = 0; i < 19; i++)
+	{
+		for (int j = 0; j < 19; j++)
+		{
+			board[j][i] = '*';
+		}
+	}
+}
+
+void print_Board(char board[19][19])
+{
+	for (int i = 0; i < 19; i++)
+	{
+		for (int j = 0; j < 19; j++)
+		{
+			cout << board[i][j] << " ";
+		}
+		cout << endl;
+	}
+}
+
+void insert_Stone(char board[19][19])
+{
+	int count = 0, col = 0, row = 0, bCount = 0, wCount = 0;
+	while (true)
+	{
+		if (count % 2 == 0)
+			cout << "흑돌(o)의 차례입니다. 돌을 놓아주세요(x,y) : ";
+		else
+			cout << "백돌(x)의 차례입니다. 돌을 놓아주세요(x,y) : ";
+		cin >> row >> col;
+		if (cin.fail()) {
+			cout << "잘못된 입력이 입력되었습니다. 다시 입력해주세요" << endl;
+			cin.clear();
+			rewind(stdin);
+			continue;
+		}
+		else if (row < 0 || row > 18 || col < 0 || col > 18) {
+			cout << "잘못된 범위의 숫자가 입력되었습니다. 다시 입력해주세요" << endl;
+			continue;
+		}
+		else if (board[col][row] == 'o' || board[col][row] == 'x') {
+			cout << "이미 돌이 놓여있습니다. 다시 입력해주세요" << endl;
+			continue;
+		}				
+		if (count % 2 == 0) {
+			board[col][row] = 'o';
+			count++;
+			bCount++;
+		}			
+		else {
+			board[col][row] = 'x';
+			count++;
+			wCount++;
+		}
+		print_Board(board);
+		all_Stone(board);
+	}
+}
+
+void all_Stone(char board[19][19])
+{
+	bool hole = false;
+	max_Stone Line;
+	row_Stone(board);
+	col_Stone(board);
+	row_Conti(board, hole, &Line);
+	col_Conti(board, hole, &Line);
+	row_Diaognal_D(board, hole, &Line);
+	row_Diaognal_U(board, hole, &Line);
+	col_Diaognal_D(board, hole, &Line);
+	col_Diaognal_U(board, hole, &Line);
+	final_Line(board, &Line);
+}
+
+void row_Stone(char board[19][19])
+{
+	int row_BCount = 0, row_WCount = 0;
+	for (int col = 0; col < 19; col++)
+	{
+		row_BCount = 0;
+		row_WCount = 0;
+		for (int row = 0; row < 19; row++)
+		{
+			if (board[col][row] == 'o')
+				row_BCount++;
+			else if (board[col][row] == 'x')
+				row_WCount++;
+		}
+		if (row_BCount > 0 || row_WCount > 0)
+			cout << col << " 번째 가로줄에서 흑돌: " << row_BCount << " 백돌: " << row_WCount << endl;
+	}
+}
+
+void col_Stone(char board[19][19])
+{
+	int col_BCount = 0, col_WCount = 0;
+	for (int row = 0; row < 19; row++)
+	{
+		col_BCount = 0;
+		col_WCount = 0;
+		for (int col = 0; col < 19; col++)
+		{
+			if (board[col][row] == 'o')
+				col_BCount++;
+			else if (board[col][row] == 'x')
+				col_WCount++;
+		}
+		if (col_BCount > 0 || col_WCount > 0)
+			cout << row << " 번째 세로줄에서 흑돌: " << col_BCount << " 백돌: " << col_WCount << endl;
+	}
+}
+
+void row_Conti(char board[19][19], bool hole, max_Stone* Line)
+{
+	int bConti = 0, wConti = 0, max_B[19] = { 0 }, max_W[19] = { 0 }, next_hole = 0, first_row = 0, first_col = 0, last_row = 0;
+	for (int col = 0; col < 19; col++)
+	{
+		bConti = 0;
+		wConti = 0;
+		max_B[col] = 0;
+		max_W[col] = 0;
+		for (int row = 0; row < 19; row++)
+		{
+			bConti = 0;
+			wConti = 0;
+			next_hole = 0;
+			first_row = 0, first_col = 0, last_row = 0;
+			if (board[col][row] == 'o') {
+				hole = false;
+				bConti = 1;
+				if (max_B[col] < bConti)
+					max_B[col] = bConti;
+				if (Line->row_lengthB < max_B[col]) {
+					Line->row_lengthB = max_B[col];
+					Line->row_xB = row;
+					Line->row_yB = col;
+				}
+				if (Line->fi_length[0] < Line->row_lengthB) {
+					Line->fi_length[0] = Line->row_lengthB;
+					Line->fi_x[0] = Line->row_xB;
+					Line->fi_y[0] = Line->row_yB;
+					Line->fi_stone[0] = 'o';
+				}
+				int rowW = row + 1;
+				while (rowW < 19)
+				{
+					if (board[col][rowW] == 'o') {
+						bConti++;
+						if (max_B[col] < bConti)
+							max_B[col] = bConti;
+						if (Line->row_lengthB < max_B[col]) {
+							Line->row_lengthB = max_B[col];
+							Line->row_xB = row;
+							Line->row_yB = col;
+						}
+						if (Line->fi_length[0] < Line->row_lengthB) {
+							Line->fi_length[0] = Line->row_lengthB;
+							Line->fi_x[0] = Line->row_xB;
+							Line->fi_y[0] = Line->row_yB;
+							Line->fi_stone[0] = 'o';
+						}
+					}
+					else {
+						row = rowW - 1;
+						break;
+					}
+					rowW++;
+				}
+			}
+			else if (board[col][row] == 'x') {
+				hole = false;
+				wConti = 1;
+				if (max_W[col] < wConti)
+					max_W[col] = wConti;
+				if (Line->row_lengthW < max_W[col]) {
+					Line->row_lengthW = max_W[col];
+					Line->row_xW = row;
+					Line->row_yW = col;
+				}
+				if (Line->fi_length[0] < Line->row_lengthW) {
+					Line->fi_length[0] = Line->row_lengthW;
+					Line->fi_x[0] = Line->row_xW;
+					Line->fi_y[0] = Line->row_yW;
+					Line->fi_stone[0] = 'x';
+				}
+				int rowW = row + 1;
+				while (rowW < 19)
+				{
+					if (board[col][rowW] == 'x') {
+						wConti++;
+						if (max_W[col] < wConti)
+							max_W[col] = wConti;
+						if (Line->row_lengthW < max_W[col]) {
+							Line->row_lengthW = max_W[col];
+							Line->row_xW = row;
+							Line->row_yW = col;
+						}
+						if (Line->fi_length[0] < Line->row_lengthW) {
+							Line->fi_length[0] = Line->row_lengthW;
+							Line->fi_x[0] = Line->row_xW;
+							Line->fi_y[0] = Line->row_yW;
+							Line->fi_stone[0] = 'x';
+						}
+					}
+					else {
+						row = rowW - 1;
+						break;
+					}
+					rowW++;
+				}
+			}
+		}
+		if (max_W[col] > 1 || max_B[col] > 1) {
+			if (max_W[col] < max_B[col])
+				cout << col << " 번째 가로줄에서 흑돌 " << max_B[col] << " 개가 연속적으로 놓여있습니다." << endl;
+			else if (max_B[col] < max_W[col])
+				cout << col << " 번째 가로줄에서 백돌 " << max_W[col] << " 개가 연속적으로 놓여있습니다." << endl;
+			else 
+				cout << col << " 번째 가로줄에서 흑돌과 백돌 " << max_B[col] << " 개가 연속적으로 놓여있습니다." << endl;
+		}		
+	}
+}
+
+void col_Conti(char board[19][19], bool hole, max_Stone* Line)
+{
+	int bConti = 0, wConti = 0, max_B[19] = { 0 }, max_W[19] = { 0 }, next_hole = 0, first_row = 0, first_col = 0, last_col = 0;
+	for (int row = 0; row < 19; row++)
+	{
+		bConti = 0;
+		wConti = 0;
+		max_B[row] = 0;
+		max_W[row] = 0;
+		for (int col = 0; col < 19; col++)
+		{
+			bConti = 0;
+			wConti = 0;
+			next_hole = 0;
+			first_row = 0, first_col = 0, last_col = 0;
+			if (board[col][row] == 'o') {
+				hole = false;
+				bConti = 1;
+				if (max_B[row] < bConti)
+					max_B[row] = bConti;
+				int colL = col + 1;
+				while (colL < 19)
+				{
+					if (board[colL][row] == 'o') {
+						bConti++;
+						if (max_B[row] < bConti)
+							max_B[row] = bConti;
+					}					
+					else {
+						col = colL - 1;
+						break;
+					}
+					colL++;
+				}
+			}
+			else if (board[col][row] == 'x') {
+				hole = false;
+				wConti = 1;
+				if (max_W[row] < wConti)
+					max_W[row] = wConti;
+				int colL = col + 1;
+				while (colL < 19)
+				{
+					if (board[colL][row] == 'x') {
+						wConti++;
+						if (max_W[row] < wConti)
+							max_W[row] = wConti;
+					}
+					else {
+						col = colL - 1;
+						break;
+					}
+					colL++;
+				}
+			}			
+		}
+		if (max_W[row] > 1 || max_B[row] > 1) {
+			if (max_W[row] < max_B[row])
+				cout << row << " 번째 세로줄에서 흑돌 " << max_B[row] << " 개가 연속적으로 놓여있습니다." << endl;
+			else if (max_B[row] < max_W[row])
+				cout << row << " 번째 세로줄에서 백돌 " << max_W[row] << " 개가 연속적으로 놓여있습니다." << endl;
+			else
+				cout << row << " 번째 세로줄에서 흑돌과 백돌 " << max_B[row] << " 개가 연속적으로 놓여있습니다." << endl;
+		}
+	}	
+}
+
+void row_Diaognal_D(char board[19][19], bool hole, max_Stone* Line)
+{
+	int bConti = 0, wConti = 0, max_B[19] = { 0 }, max_W[19] = { 0 }, next_hole = 0, first_rDDR = 0, first_rDDC = 0, last_rDDR = 0, last_rDDC = 0;
+	for (int row = 1; row < 19; row++)
+	{
+		bConti = 0;
+		wConti = 0;
+		max_B[row] = 0;
+		max_W[row] = 0;
+		for (int rowW = row; rowW > -1; rowW--)
+		{
+			for (int col = 0; col < 19; col++, rowW--)
+			{
+				bConti = 0;
+				wConti = 0;
+				next_hole = 0;
+				first_rDDR = 0, first_rDDC = 0, last_rDDR = 0, last_rDDC = 0;
+				if (board[col][rowW] == 'o') {
+					hole = false;
+					bConti = 1;					
+					if (max_B[row] < bConti)
+						max_B[row] = bConti;
+					int colT = col + 1;
+					int rowT = rowW - 1;
+					while (colT < 19 && rowT > -1)
+					{
+						if (board[colT][rowT] == 'o') {
+							bConti++;
+							if (max_B[row] < bConti)
+								max_B[row] = bConti;
+						}						
+						else {
+							rowW = rowT + 1;
+							col = colT - 1;
+							break;
+						}
+						rowT--;
+						colT++;
+					}
+				}
+				else if (board[col][rowW] == 'x') {
+					hole = false;
+					wConti = 1;
+					if (max_W[row] < wConti)
+						max_W[row] = wConti;
+					int colT = col + 1;
+					int rowT = rowW - 1;
+					while (colT < 19 && rowT > -1)
+					{
+						if (board[colT][rowT] == 'x') {
+							wConti++;
+							if (max_W[row] < wConti)
+								max_W[row] = wConti;
+						}
+						else {
+							rowW = rowT + 1;
+							col = colT - 1;
+							break;
+						}
+						rowT--;
+						colT++;
+					}
+				}				
+			}
+		}		
+		if (max_W[row] > 1 || max_B[row] > 1) {
+			if (max_W[row] < max_B[row])
+				cout << row << " 번째 대각선(↙)에서 흑돌 " << max_B[row] << " 개가 연속적으로 놓여있습니다." << endl;
+			else if (max_B[row] < max_W[row])
+				cout << row << " 번째 대각선(↙)에서 백돌 " << max_W[row] << " 개가 연속적으로 놓여있습니다." << endl;
+			else
+				cout << row << " 번째 대각선(↙)에서 흑돌과 백돌 " << max_B[row] << " 개가 연속적으로 놓여있습니다." << endl;
+		}
+	}
+}
+
+void row_Diaognal_U(char board[19][19], bool hole, max_Stone* Line)
+{
+	int bConti = 0, wConti = 0, max_B[19] = { 0 }, max_W[19] = { 0 }, next_hole = 0, first_rDUR = 0, first_rDUC = 0, last_rDUR = 0, last_rDUC = 0;
+	for (int row = 1; row < 19; row++)
+	{
+		bConti = 0;
+		wConti = 0;
+		max_B[row] = 0;
+		max_W[row] = 0;
+		for (int rowW = row; rowW < 18; rowW++)
+		{
+			for (int col = 18; col > -1; col--, rowW++)
+			{
+				bConti = 0;
+				wConti = 0;
+				next_hole = 0;
+				first_rDUR = 0, first_rDUC = 0, last_rDUR = 0, last_rDUC = 0;
+				if (board[col][rowW] == 'o') {
+					hole = false;
+					bConti = 1;
+					if (max_B[row] < bConti)
+						max_B[row] = bConti;
+					int colT = col - 1;
+					int rowT = rowW + 1;
+					while (colT > -1 && rowT < 19)
+					{
+
+						if (board[colT][rowT] == 'o') {
+							bConti++;
+							if (max_B[row] < bConti)
+								max_B[row] = bConti;
+						}
+						else {
+							rowW = rowT - 1;
+							col = colT + 1;
+							break;
+						}
+						rowT++;
+						colT--;
+					}
+				}
+				else if (board[col][rowW] == 'x') {
+					hole = false;
+					wConti = 1;
+					if (max_W[row] < wConti)
+						max_W[row] = wConti;
+					int colT = col - 1;
+					int rowT = rowW + 1;
+					while (colT > -1 && rowT < 19)
+					{
+
+						if (board[colT][rowT] == 'x') {
+							wConti++;
+							if (max_W[row] < wConti)
+								max_W[row] = wConti;
+						}
+						else {
+							rowW = rowT - 1;
+							col = colT + 1;
+							break;
+						}
+						rowT++;
+						colT--;
+					}
+				}				
+			}
+		}
+		if (max_W[row] > 1 || max_B[row] > 1) {
+			if (max_W[row] < max_B[row])
+				cout << 18 + row << " 번째 대각선(↗)에서 흑돌 " << max_B[row] << " 개가 연속적으로 놓여있습니다." << endl;
+			else if (max_B[row] < max_W[row])
+				cout << 18 + row << " 번째 대각선(↗)에서 백돌 " << max_W[row] << " 개가 연속적으로 놓여있습니다." << endl;
+			else
+				cout << 18 + row << " 번째 대각선(↗)에서 흑돌과 백돌 " << max_B[row] << " 개가 연속적으로 놓여있습니다." << endl;
+		}
+	}
+}
+
+void col_Diaognal_D(char board[19][19], bool hole, max_Stone* Line)
+{
+	int bConti = 0, wConti = 0, max_B[19] = { 0 }, max_W[19] = { 0 }, next_hole = 0, first_cDDR = 0, first_cDDC = 0, last_cDDR = 0, last_cDDC = 0;
+	for (int col = 17; col > -1; col--)
+	{
+		bConti = 0;
+		wConti = 0;
+		max_B[col] = 0;
+		max_W[col] = 0;
+		for (int colL = col; colL < 19; colL++)
+		{
+			for (int row = 0; row < 19; row++, colL++)
+			{
+				bConti = 0;
+				wConti = 0;
+				next_hole = 0;
+				first_cDDR = 0, first_cDDC = 0, last_cDDR = 0, last_cDDC = 0;
+				if (board[colL][row] == 'o') {
+					hole = false;
+					bConti = 1;
+					if (max_B[col] < bConti)
+						max_B[col] = bConti;
+					int colT = colL + 1;
+					int rowT = row + 1;
+					while (colT < 19 && rowT < 19)
+					{
+						if (board[colT][rowT] == 'o') {
+							bConti++;
+							if (max_B[col] < bConti)
+								max_B[col] = bConti;
+						}
+						else {
+							row = rowT - 1;
+							colL = colT - 1;
+							break;
+						}
+						rowT++;
+						colT++;
+					}
+				}
+				else if (board[colL][row] == 'x') {
+					hole = false;
+					wConti = 1;
+					if (max_W[col] < wConti)
+						max_W[col] = wConti;
+					int colT = colL + 1;
+					int rowT = row + 1;
+					while (colT < 19 && rowT < 19)
+					{
+						if (board[colT][rowT] == 'x') {
+							wConti++;
+							if (max_W[col] < wConti)
+								max_W[col] = wConti;
+						}
+						else {
+							row = rowT - 1;
+							colL = colT - 1;
+							break;
+						}
+						rowT++;
+						colT++;
+					}
+				}				
+			}
+		}
+		if (max_W[col] > 1 || max_B[col] > 1) {
+			if (max_W[col] < max_B[col])
+				cout << 18 - col << " 번째 대각선(↘)에서 흑돌 " << max_B[col] << " 개가 연속적으로 놓여있습니다." << endl;
+			else if (max_B[col] < max_W[col])
+				cout << 18 - col << " 번째 대각선(↘)에서 백돌 " << max_W[col] << " 개가 연속적으로 놓여있습니다." << endl;
+			else
+				cout << 18 - col << " 번째 대각선(↘)에서 흑돌과 백돌 " << max_B[col] << " 개가 연속적으로 놓여있습니다." << endl;
+		}
+	}
+}
+
+void col_Diaognal_U(char board[19][19], bool hole, max_Stone* Line)
+{
+	int bConti = 0, wConti = 0, max_B[19] = { 0 }, max_W[19] = { 0 }, next_hole = 0, first_cDUR = 0, first_cDUC = 0, last_cDUR = 0, last_cDUC = 0;
+	for (int col = 17; col > -1; col--)
+	{
+		bConti = 0;
+		wConti = 0;
+		max_B[col] = 0;
+		max_W[col] = 0;
+		for (int colL = col; colL > -1; colL--)
+		{
+			for (int row = 18; row > -1; row--, colL--)
+			{
+				bConti = 0;
+				wConti = 0;
+				next_hole = 0;
+				first_cDUR = 0, first_cDUC = 0, last_cDUR = 0, last_cDUC = 0;
+				if (board[colL][row] == 'o') {
+					hole = false;
+					bConti = 1;
+					if (max_B[col] < bConti)
+						max_B[col] = bConti;
+					int colT = colL - 1;
+					int rowT = row - 1;
+					while (colT > -1 && rowT > -1)
+					{
+						if (board[colT][rowT] == 'o') {
+							bConti++;
+							if (max_B[col] < bConti)
+								max_B[col] = bConti;
+						}
+						else {
+							row = rowT + 1;
+							colL = colT + 1;
+							break;
+						}
+						rowT--;
+						colT--;
+					}
+				}
+				else if (board[colL][row] == 'x') {
+					hole = false;
+					wConti = 1;
+					if (max_W[col] < wConti)
+						max_W[col] = wConti;
+					int colT = colL - 1;
+					int rowT = row - 1;
+					while (colT > -1 && rowT > -1)
+					{
+						if (board[colT][rowT] == 'x') {
+							wConti++;
+							if (max_W[col] < wConti)
+								max_W[col] = wConti;
+						}
+						else {
+							row = rowT + 1;
+							colL = colT + 1;
+							break;
+						}
+						rowT--;
+						colT--;
+					}
+				}				
+			}
+		}
+		if (max_W[col] > 1 || max_B[col] > 1) {
+			if (max_W[col] < max_B[col])
+				cout << 36 - col << " 번째 대각선(↖)에서 흑돌 " << max_B[col] << " 개가 연속적으로 놓여있습니다." << endl;
+			else if (max_B[col] < max_W[col])
+				cout << 36 - col << " 번째 대각선(↖)에서 백돌 " << max_W[col] << " 개가 연속적으로 놓여있습니다." << endl;
+			else
+				cout << 36 - col << " 번째 대각선(↖)에서 흑돌과 백돌 " << max_B[col] << " 개가 연속적으로 놓여있습니다." << endl;
+		}
+	}
+}
+
+void final_Line(char board[19][19], max_Stone* Line)
+{
+	int compare_X = 0, compare_Y = 0, compare_Line = 0;
+	char compare_Stone = 0;
+	for (int i = 0; i < 6; i++)
+	{
+		if (compare_Line < Line->fi_length[i]) {
+			compare_Line = Line->fi_length[i];
+			compare_X = Line->fi_x[i];
+			compare_Y = Line->fi_x[i];
+			compare_Stone = Line->fi_stone[i];
+		}
+	}
+	if (compare_Line > 1)
+		cout << "(" << compare_X << "," << compare_Y << ")" << " 에서 " << compare_Stone << " 이 " << compare_Line << "만큼 연속되어 있습니다." << endl;
+}
+ 
