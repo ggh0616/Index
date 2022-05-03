@@ -1,0 +1,86 @@
+#include <iostream>
+#include <fstream>
+
+using namespace std;
+
+typedef struct Champ {
+	char position[20];
+	char name[20];
+	int hp;	
+	int ad;
+	int armor;	
+};
+
+typedef struct Node {
+	Champ data;
+	Node* prev;
+	Node* next;
+};
+
+void load(Node** Head, Node** temp);
+void print_SL(Node* Head, Node** temp);
+void sortByName_SL(Node** temp);
+
+int main()
+{
+	Node* Head = NULL;
+	Node* temp = new Node;
+	bool check = false;
+	load(&Head, &temp);
+	print_SL(Head, &temp);
+	sortByName_SL(&temp);
+}
+
+void load(Node** Head, Node** temp)
+{
+	ifstream load("LOLDic.txt");	
+	if (load.is_open()) {
+		while (!load.eof())
+		{
+			Node* node = new Node;			
+			if (*Head == NULL) {				
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->next = NULL;
+				*Head = node;
+				*temp = node;
+			}
+			else {
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->next = NULL;
+				(*Head)->next = node;
+				*Head = node;
+			}
+		}		
+	}	
+	load.close();
+}
+
+void print_SL(Node* Head, Node** temp)
+{
+	Node* Target = *temp;
+	int count = 1;
+	while (Target != NULL)
+	{
+		if (count % 100000 == 0)
+			cout << Target->data.position << " " << Target->data.name << " "  << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
+		Target = Target->next;
+		count++;
+	}
+}
+
+void sortByName_SL(Node** temp)
+{
+	Node* Target = *temp;
+	Champ temp_name;
+	for (Node* node2 = Target->next; node2 != NULL; node2 = node2->next)
+	{
+		for (Node* node1 = Target; node1->next != NULL; node1 = node1->next)
+		{
+			if (strcmp(node1->data.name, node1->next->data.name) > 0) {
+				temp_name = node1->data;
+				node1->data = node1->next->data;
+				node1->next->data = temp_name;
+			}
+		}
+	}
+}
