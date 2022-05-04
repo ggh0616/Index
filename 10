@@ -6,9 +6,9 @@ using namespace std;
 typedef struct Champ {
 	char position[20];
 	char name[20];
-	int hp;	
+	int hp;
 	int ad;
-	int armor;	
+	int armor;
 };
 
 typedef struct Node {
@@ -17,28 +17,64 @@ typedef struct Node {
 	Node* next;
 };
 
-void load(Node** Head, Node** temp);
-void print_SL(Node* Head, Node** temp);
-void sortByName_SL(Node** temp);
+void load_SL(Node** Head, Node** temp);
+void load_DL(Node** Head, Node** Tail, Node** temp);
+void print_SL(Node** temp);
+void sortByName_SL(Node** temp, bool *check);
+void findName_SL(Node** temp, bool* check);
 
 int main()
 {
 	Node* Head = NULL;
 	Node* temp = new Node;
+	Node* Head2 = NULL;
+	Node* Tail = NULL;
+	Node* temp2 = new Node;
 	bool check = false;
-	load(&Head, &temp);
-	print_SL(Head, &temp);
-	sortByName_SL(&temp);
+	bool check2 = false;
+	load_SL(&Head, &temp);
+	load_DL(&Head2, &Tail, &temp2);
+	int number = 0;
+	while (true)
+	{
+		cout << "번호: ";
+		rewind(stdin);
+		cin >> number;
+		if (cin.fail()) {
+			cout << "잘못된 문자가 입력되었습니다." << endl;
+			rewind(stdin);
+			cin.clear();
+			continue;
+		}
+		switch (number)
+		{
+		case 0:
+			cout << "시스템을 종료합니다." << endl;
+			break;
+		case 1:
+			print_SL(&temp);
+			break;
+		case 2:
+			sortByName_SL(&temp, &check);
+			break;
+		case 3:
+			findName_SL(&temp, &check);
+			break;
+		default:
+			cout << "잘못된 숫자를 입력하였습니다." << endl;
+			continue;
+		}
+	}	
 }
 
-void load(Node** Head, Node** temp)
+void load_SL(Node** Head, Node** temp)
 {
-	ifstream load("LOLDic.txt");	
+	ifstream load("LOLDic.txt");
 	if (load.is_open()) {
 		while (!load.eof())
 		{
-			Node* node = new Node;			
-			if (*Head == NULL) {				
+			Node* node = new Node;
+			if (*Head == NULL) {
 				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
 				node->next = NULL;
 				*Head = node;
@@ -50,37 +86,85 @@ void load(Node** Head, Node** temp)
 				(*Head)->next = node;
 				*Head = node;
 			}
-		}		
-	}	
+		}
+	}
 	load.close();
+	cout << (*temp)->data.name << endl;
 }
 
-void print_SL(Node* Head, Node** temp)
+void load_DL(Node** Head, Node** Tail, Node** temp)
+{
+	ifstream load("LOLDic.txt");
+	if (load.is_open()) {
+		while (!load.eof())
+		{
+			Node* node = new Node;
+			if (*Head == NULL) {
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->next = NULL;
+				node->prev = *Head;
+				*Head = node;
+			}
+		}
+	}
+}
+
+void print_SL(Node** temp)
 {
 	Node* Target = *temp;
 	int count = 1;
-	while (Target != NULL)
+	cout << Target->data.name << endl;
+	while (Target->next != NULL)
 	{
-		if (count % 100000 == 0)
-			cout << Target->data.position << " " << Target->data.name << " "  << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
+		if (count % 1 == 0)
+			cout << Target->data.position << " " << Target->data.name << " " << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
 		Target = Target->next;
 		count++;
 	}
 }
 
-void sortByName_SL(Node** temp)
+void sortByName_SL(Node** temp, bool *check)
 {
 	Node* Target = *temp;
 	Champ temp_name;
-	for (Node* node2 = Target->next; node2 != NULL; node2 = node2->next)
+	for (Node* node2 = Target->next; node2->next != NULL; node2 = node2->next) 
 	{
-		for (Node* node1 = Target; node1->next != NULL; node1 = node1->next)
+		for (Node* node1 = Target; node1->next->next != NULL; node1 = node1->next)
 		{
 			if (strcmp(node1->data.name, node1->next->data.name) > 0) {
-				temp_name = node1->data;
-				node1->data = node1->next->data;
-				node1->next->data = temp_name;
+				temp_name = node1->next->data;
+				node1->next->data = node1->data;
+				node1->data = temp_name;
 			}
 		}
+	}
+	*check = true;
+}
+
+void findName_SL(Node** temp, bool* check)
+{
+	if (*check == false) {
+		cout << "sort가 되지 않았습니다. sort를 진행해주세요" << endl;
+		return;
+	}
+	else {
+		Node* Target = *temp;
+		char find_Champ[20];
+		bool find = false;
+		cout << "검색할 챔피언의 이름을 입력하시오: ";
+		rewind(stdin);
+		cin >> find_Champ;
+		while (Target->next != NULL)
+		{
+			if (!strcmp(find_Champ, Target->data.name)) {
+				find = true;
+				cout << Target->data.position << " " << Target->data.name << " " << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
+				Target = Target->next;
+			}
+			else
+				Target = Target->next;
+		}
+		if (!find)
+			cout << "없는 챔피언입니다." << endl;
 	}
 }
