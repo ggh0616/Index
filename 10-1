@@ -1,0 +1,303 @@
+#include <iostream>
+#include <fstream>
+#include <time.h>
+
+using namespace std;
+
+typedef struct Champ {
+	char position[20];
+	char name[20];
+	int hp;
+	int ad;
+	int armor;
+}Champ;
+
+typedef struct Node {
+	Champ data;
+	Node* prev;
+	Node* next;
+}Node;
+
+void load_SL(Node** Head_SL, Node** temp_SL);
+void load_DL(Node** Head_DL, Node** Tail_DL, Node** temp_DL);
+void print(Node** temp_SL, Node** temp_DL);
+void sortByName(Node** temp_SL, Node** temp_DL, bool* check_SL, bool* check_DL);
+void findName(Node** temp_SL, Node** temp_DL, bool* check_SL, bool* check_DL);
+void print_SL(Node** temp_SL, double* compareP_SL);
+void print_DL(Node** temp_DL, double* compareP_DL);
+void sortByName_SL(Node** temp_SL, bool *check_SL, double* compareS_SL);
+void sortByName_DL(Node** temp_DL, bool *check_DL, double* compareS_DL);
+void findName_SL(Node** temp_SL, bool* check_SL, double* compareF_SL);
+void findName_DL(Node** temp_DL, bool* check_DL, double* compareF_DL);
+
+int main()
+{
+	Node* Head_SL = NULL;
+	Node* Head_DL = NULL;
+	Node* Tail_DL = NULL;		
+	Node* temp_SL = new Node;
+	Node* temp_DL = new Node;
+	bool check_SL = false;
+	bool check_DL = false;
+	int number = 0;
+	load_SL(&Head_SL, &temp_SL);
+	load_DL(&Head_DL, &Tail_DL, &temp_DL);
+	while (true)
+	{
+		cout << "번호: ";
+		rewind(stdin);
+		cin >> number;
+		if (cin.fail()) {
+			cout << "잘못된 문자가 입력되었습니다." << endl;
+			rewind(stdin);
+			cin.clear();
+			continue;
+		}
+		switch (number)
+		{
+		case 0:
+			cout << "시스템을 종료합니다." << endl;
+			exit(1);
+		case 1:
+			print(&temp_SL, &temp_DL);
+			break;
+		case 2:
+			sortByName(&temp_SL, &temp_DL, &check_SL, &check_DL);
+			break;
+		case 3:
+			findName(&temp_SL, &temp_DL, &check_SL, &check_DL);
+			break;
+		default:
+			cout << "잘못된 숫자를 입력하였습니다." << endl;
+			continue;
+		}
+	}
+}
+
+void load_SL(Node** Head_SL, Node** temp_SL)
+{
+	ifstream load("test.txt");	
+	if (!load) {
+		return;
+	}
+	if (load.is_open()) {
+		clock_t start = clock();
+		while (!load.eof())
+		{
+			Node* node = new Node;
+			if (*Head_SL == NULL) {
+				load >> node->data.position >> node->data.name  >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->next = NULL;
+				*Head_SL = node;
+				*temp_SL = node;
+			}
+			else {
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->next = NULL;
+				(*Head_SL)->next = node;
+				*Head_SL = node;
+			}
+		}
+		clock_t end = clock();
+		double compare_SL = (double)(end - start) / CLOCKS_PER_SEC;
+		cout << compare_SL << endl;
+	}
+	load.close();
+}
+
+void load_DL(Node** Head_DL, Node** Tail_DL, Node** temp_DL)
+{
+	ifstream load("test.txt");
+	if (!load) {
+		return;
+	}
+	if (load.is_open()) {
+		clock_t start = clock();
+		while (!load.eof())
+		{
+			Node* node = new Node;
+			if (*Head_DL == NULL) {
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->next = NULL;
+				*Head_DL = node;
+				*temp_DL = node;							
+			}
+			else {
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->next = NULL;
+				node->prev = *Head_DL;
+				(*Head_DL)->next = node;
+				*Head_DL = node;
+				/*node->next = (*Head_DL)->next;
+				node->prev = *Head_DL;				
+				(*Head_DL)->next = node;
+				*Head_DL = node;*/
+			}
+		}
+		clock_t end = clock();
+		double compare_DL = (double)(end - start) / CLOCKS_PER_SEC;
+		cout << compare_DL << endl;
+	}
+	load.close();
+}
+
+void print(Node** temp_SL, Node** temp_DL)
+{
+	double compareP_SL = 0;
+	double compareP_DL = 0;
+	print_SL(temp_SL, &compareP_SL);
+	cout << endl;
+	print_DL(temp_DL, &compareP_DL);
+	cout << "소요시간: " << compareP_SL << endl;
+	cout << "소요시간: " << compareP_DL << endl;
+}
+
+void sortByName(Node** temp_SL, Node** temp_DL, bool* check_SL, bool* check_DL)
+{
+	double compareS_SL = 0;
+	double compareS_DL = 0;
+	sortByName_SL(temp_SL, check_SL, &compareS_SL);
+	sortByName_DL(temp_DL, check_DL, &compareS_DL);
+	cout << "소요시간: " << compareS_SL << endl;
+	cout << "소요시간: " << compareS_DL << endl;
+}
+
+void findName(Node** temp_SL, Node** temp_DL, bool* check_SL, bool* check_DL)
+{
+	double compareF_SL = 0;
+	double compareF_DL = 0;
+	findName_SL(temp_SL, check_SL, &compareF_SL);
+	findName_DL(temp_DL, check_DL, &compareF_DL);
+	cout << "소요시간: " << compareF_SL << endl;
+	cout << "소요시간: " << compareF_DL << endl;
+}
+
+void print_SL(Node** temp_SL, double* compareP_SL)
+{
+	Node* Target = *temp_SL;
+	int count = 1;
+	clock_t start = clock();
+	while (Target != NULL)
+	{			
+		if (count % 1 == 0)
+			cout << Target->data.position << " " << Target->data.name << " " << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
+		Target = Target->next;
+		count++;
+	}
+	clock_t end = clock();
+	*compareP_SL = (double)(end - start) / CLOCKS_PER_SEC;
+}
+
+void print_DL(Node** temp_DL, double* compareP_DL)
+{
+	Node* Target = *temp_DL;
+	int count = 1;
+	clock_t start = clock();
+	while (Target != NULL)
+	{
+		if (count % 1 == 0)
+			cout << Target->data.position << " " << Target->data.name << " " << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
+		Target = Target->next;
+		count++;
+	}
+	clock_t end = clock();
+	*compareP_DL = (double)(end - start) / CLOCKS_PER_SEC;
+}
+
+void sortByName_SL(Node** temp_SL, char* s_Name, bool* check_SL, double* compareS_SL)
+{
+	Node* Target = *temp_SL;
+	Champ temp_name;
+	int re = 0;
+	*check_SL = true;
+	clock_t start = clock();
+	while (Target != NULL)
+	{
+		re = strcmp(s_Name, Target->data.name) > 0;
+	}
+	clock_t end = clock();
+	*compareS_SL = (double)(end - start) / CLOCKS_PER_SEC;
+}
+
+void sortByName_DL(Node** temp_DL, bool* check_DL, double* compareS_DL)
+{
+	Node* Target = *temp_DL;
+	Champ temp_name;
+	*check_DL = true;
+	clock_t start = clock();
+	for (Node* node2 = Target; node2->next != NULL; node2 = node2->next)
+	{
+		for (Node* node1 = Target; node1->next != NULL; node1 = node1->next)
+		{
+			if (strcmp(node1->data.name, node1->next->data.name) > 0) {
+				temp_name = node1->next->data;
+				node1->next->data = node1->data;
+				node1->data = temp_name;
+			}
+		}
+	}
+	clock_t end = clock();
+	*compareS_DL = (double)(end - start) / CLOCKS_PER_SEC;
+}
+
+void findName_SL(Node** temp_SL, bool* check_SL, double* compareF_SL)
+{
+	if (!*check_SL) {
+		cout << "정렬이 되지 않았습니다." << endl;
+		return;
+	}
+	else {
+		char find_Name[20];
+		cout << "이름 검색: ";
+		rewind(stdin);
+		cin >> find_Name;
+		Node* Target = *temp_SL;		
+		bool find = false;
+		clock_t start = clock();
+		while (Target->next != NULL)
+		{
+			if (!strcmp(find_Name, Target->data.name)) {
+				find = true;
+				cout << Target->data.name << " " << Target->data.position << " " << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
+				Target = Target->next;
+			}
+			else
+				Target = Target->next;
+		}
+		if (!find)
+			cout << "없는 챔피언입니다." << endl;
+		clock_t end = clock();
+		*compareF_SL = (double)(end - start) / CLOCKS_PER_SEC;
+	}
+}
+
+void findName_DL(Node** temp_DL, bool* check_DL, double* compareF_DL)
+{
+	if (!*check_DL) {
+		cout << "정렬이 되지 않았습니다." << endl;
+		return;
+	}
+	else {
+		char find_Name[20];
+		cout << "이름 검색: ";
+		rewind(stdin);
+		cin >> find_Name;
+		Node* Target = *temp_DL;
+		bool find = false;
+		clock_t start = clock();
+		while (Target->next != NULL)
+		{
+			if (!strcmp(find_Name, Target->data.name)) {
+				find = true;
+				cout << Target->data.name << " " << Target->data.position << " " << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
+				Target = Target->next;
+			}
+			else
+				Target = Target->next;
+		}
+		if (!find)
+			cout << "없는 챔피언입니다." << endl;
+		clock_t end = clock();
+		*compareF_DL = (double)(end - start) / CLOCKS_PER_SEC;
+	}
+}
