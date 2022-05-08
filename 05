@@ -1,0 +1,95 @@
+#include <iostream>
+#include <fstream>
+#include <time.h>
+
+using namespace std;
+
+typedef struct Champ {
+	char position[20];
+	char name[20];
+	int hp;
+	int ad;
+	int armor;
+	int count;
+};
+
+typedef struct Node {
+	Champ data;
+	Node* next;
+	Node* prev;
+};
+
+void load(Node** Head, Node** Temp, Node** Last, int* count);
+void swap(Node* node1, Node* node2);
+void quickSort(Node** Head, Node** Last, Node** Temp, int* count);
+void print(Node** temp);
+
+int main()
+{
+	Node* Head = NULL;
+	Node* Temp = new Node;
+	Node* Last = new Node;
+	int count = 1;
+	load(&Head, &Temp, &Last, &count);
+	quickSort(&Head, &Last, &Temp, &count);	
+	print(&Temp);
+}
+
+void load(Node** Head, Node** Temp, Node** Last, int* count)
+{
+	ifstream load("test.txt");
+	if (load.is_open()) {
+		while (!load.eof()) 
+		{
+			Node* node = new Node;
+			if (*Head == NULL) {
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->next = NULL;
+				*Head = node;
+				*Temp = node;
+				*count = 1;
+				node->data.count = 1;
+			}
+			else {
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->next = NULL;
+				(*Head)->next = node;
+				*Head = node;
+				(*count)++;
+				node->data.count = *count;
+			}
+		}
+		*Last = *Head;
+	}
+}
+
+void swap(Node* node1, Node* node2)
+{
+	Champ Temp_Data = node1->data;
+	node1->data = node2->data;
+	node2->data = Temp_Data;
+}
+
+void quickSort(Node** Head, Node** Last, Node** Temp, int *count)
+{
+	int mid_count = (1 + *count) / 2;
+	Node* Target = *Temp;
+	for (Node* node1 = Target; node1 != NULL; node1 = node1->next) {
+		if (mid_count == node1->data.count) {
+			swap(*Temp, node1);
+		}
+	}
+	Node* pivot = *Temp;
+
+}
+
+void print(Node** Temp)
+{
+	Node* Target = *Temp;
+	while (Target != NULL)
+	{
+		cout << Target->data.position << " " << Target->data.name << " " << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
+		Target = Target->next;
+	}
+}
+
