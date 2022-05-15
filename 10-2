@@ -1,0 +1,282 @@
+#include <iostream>
+#include <fstream>
+#include <time.h>
+
+using namespace std;
+
+typedef struct Champ {
+	char position[20];
+	char name[20];
+	int hp;
+	int ad;
+	int armor;
+	int count;
+}Champ;
+
+typedef struct Node {
+	Champ data;
+	Node* next;
+	Node* prev;
+}Node;
+
+void load(Node** Tail, Node** Temp, int* count);
+void load2(Node** L3, Node** Temp2, int* count2);
+void swap(Node* node1, Node* node2);
+void partition(Node** Temp, Node** Temp2, Node** L3, int left, int right, int mid);
+void Merge(Node** Temp, Node** Temp2, Node** L3, int left, int right);
+void print(Node** Temp, Node** L3);
+
+int main()
+{	
+	Node* Tail = NULL;	
+	Node* L3 = NULL;
+	Node* Temp = new Node;
+	Node* Temp2 = new Node;
+	int count = 0; 
+	int count2 = 0; 
+	load(&Tail, &Temp, &count);
+	load2(&L3, &Temp2, &count2);
+	Merge(&Temp, &Temp2, &L3, 0, count);	
+	print(&Temp2, &L3);
+}
+
+void load(Node** Tail, Node** Temp, int* count)
+{
+	ifstream load("test.txt");
+	if (load.is_open()) {
+		while (!load.eof())
+		{
+			Node* node = new Node;
+			if (*Tail == NULL) {
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				node->data.count = *count;
+				node->next = *Tail;
+				*Tail = node;
+				*Temp = *Tail;
+				node->next = *Tail;	
+			}
+			else {
+				load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+				(*count)++;
+				node->data.count = *count;
+				node->next = (*Tail)->next;
+				(*Tail)->next = node;
+				*Tail = node;
+			}
+		}
+	}
+	load.close();
+}
+
+void load2(Node** L3, Node** Temp2, int* count2)
+{
+	ifstream load2("test.txt");
+	if (load2.is_open()) {
+		while (!load2.eof())
+		{
+			Node* node1 = new Node;			
+			if (*L3 == NULL) {
+				load2 >> node1->data.position >> node1->data.name >> node1->data.hp >> node1->data.ad >> node1->data.armor;
+				node1->data.count = *count2;
+				node1->next = NULL;
+				*L3 = node1;
+				*Temp2 = node1;
+				node1->next = *L3;
+			}
+			else {
+				load2 >> node1->data.position >> node1->data.name >> node1->data.hp >> node1->data.ad >> node1->data.armor;
+				(*count2)++;
+				node1->data.count = *count2;
+				node1->next = NULL;
+				(*L3)->next = node1;
+				*L3 = node1;
+			}
+		}		
+	}
+	load2.close();
+}
+
+void swap(Node* node1, Node* node2)
+{
+	Champ Temp_Data = node1->data;
+	node1->data = node2->data;
+	node2->data = Temp_Data;
+}
+
+void partition(Node** Temp, Node** Temp2, Node** L3, int left, int right, int mid)
+{
+	int i = left, j = mid + 1, k = 0;
+	Node* Target = *Temp; //실제 리스트
+	Node* arr_i = *Temp2; //i List
+	Node* arr_j = new Node; //j List
+	Node* L1 = new Node; //임시 리스트 (*Head2)
+	Node* L2 = new Node; //임시 리스트 스왑용 (node)
+	Node* Fi_L2 = NULL; //임시 리스트의 처음	
+	int fi = 0;
+	cout << "i: " << i << " j: " << j << " M: " << mid << endl;
+	cout << "left: " << left << " right: " << right << endl;	
+	do {
+		if (Target->data.count == j) {
+			arr_j = Target;
+			break;
+		}
+		else
+			Target = Target->next;
+	} while (Target != *Temp);
+	cout << arr_i->data.name << endl;
+	cout << arr_j->data.name << endl;
+	while (i <= mid && j <= right)
+	{		
+		if (strcmp(arr_i->data.name, arr_j->data.name) < 0) {	//i가 j보다 크거나 같으면
+			L1 = arr_i;
+			if (Fi_L2 == NULL)
+				Fi_L2 = L1;
+			arr_i = L1->next;			
+			k++;
+			i++;
+			cout << "L1: " << L1->data.name << endl;
+		}
+		else {
+			L1 = arr_j;
+			if (Fi_L2 == NULL)
+				Fi_L2 = L1;
+			arr_j = L1->next;
+			k++;
+			j++;
+			cout << "L1: " << L1->data.name << endl;
+		}
+	}
+	cout << "I: " << i << " mid: " << mid << " j: " << j << " right: " << right << endl;
+	cout << "L1: " << L1->data.name << " " << L1->next->data.name << " " << L1->next->next->data.name << endl;
+	while (i <= mid) //i가 더 큼
+	{
+		L1->next = arr_i;
+		L1 = arr_i;
+		Fi_L2 = L1;
+		k++;
+		i++;
+	}
+	cout << "L1 : " << L1->data.name << " " << L1->next->data.name << " " << L1->next->next->data.name << endl;
+	while (j <= right) //j가 더 큼
+	{
+		Fi_L2 = L1;
+		L1->next = arr_j;
+		L1 = arr_j;
+		k++;
+		j++;
+	}
+	cout << "L1_j: " << L1->data.name << endl;
+	cout << "L1: " << L1->data.name << " " << L1->next->data.name << " " << L1->next->next->data.name << endl;
+	cout << "Fi_L2: " << Fi_L2->data.name << " " << Fi_L2->next->data.name << " " << Fi_L2->next->next->data.name << endl;
+	k--;
+	cout << "swap" << endl;
+	cout << "L1: " << L1->data.name << " " << L1->next->data.name << " " << L1->next->next->data.name << endl;
+	//while (k >= 0)
+	//{	
+	//	cout << (*Temp2)->data.name << endl;		
+	//	*Temp2 = Fi_L2;		
+	//	k--;
+	//	cout << "? " << (*Temp2)->data.name << " " << (*Temp2)->next->data.name << " " << (*Temp2)->next->next->data.name << " " << (*Temp2)->next->next->next->data.name << endl;
+	//	if (k >= 0) {
+	//		(*Temp2) = (*Temp2)->next;
+	//		Fi_L2 = Fi_L2->next;
+	//	}		
+	//}	
+}
+
+void Merge(Node** Temp, Node** Temp2, Node** L3, int left, int right)
+{
+	cout << "Le: " << left << " right: " << right << endl;
+	if (left < right) {
+		int mid = (left + right) / 2;
+		cout << "Le " << left << endl;		
+		Merge(Temp, Temp2, L3, left, mid);
+		cout << "right " << right << endl;
+		Merge(Temp, Temp2, L3, mid + 1, right);
+		cout << "parti" << endl;
+		partition(Temp, Temp2, L3, left, right, mid);
+	}
+}
+
+//void Merges(Node* First, Node* Front, Node* Back)
+//{
+//	Node* Fast;
+//	Node* Slow;
+//	if (First == NULL || First->next == NULL) {
+//		*Front = *First;
+//		Back = NULL;
+//	}
+//	else {
+//		Slow = First;
+//		Fast = First->next;
+//		while (Fast != NULL)
+//		{
+//			Fast = Fast->next;
+//			if (Fast != NULL) {
+//				Slow = Slow->next;
+//				Fast = Fast->next;
+//			}
+//		}
+//		*Front = *First;
+//		Back = Slow->next;
+//		Slow->next = NULL;
+//	}
+//}
+
+//Node* quicksort_L(Node** Left, Node** Right)
+//{
+//	Node* res = NULL;
+//	Node* p;
+//	if (*Left == NULL)
+//		return(*Right);
+//	else if (*Right == NULL)
+//		return(*Left);
+//	if (strcmp((*Left)->data.name, (*Right)->data.name) > 0) {
+//		res = *Left;
+//		*Left = (*Left)->next;
+//	}
+//	else {
+//		res = *Right;
+//		*Right = (*Right)->next;
+//	}
+//	p = res;
+//	while (*Left != NULL && *Right != NULL)
+//	{
+//		if (strcmp((*Left)->data.name, (*Right)->data.name) > 0) {
+//			p->next = *Left;
+//			*Left = (*Left)->next;
+//			p = p->next;
+//		}
+//		else {
+//			p->next = *Right;
+//			*Right = (*Right)->next;
+//			p = p->next;
+//		}
+//	}
+//	if (*Left == NULL)
+//		p->next = *Right;
+//	else 
+//		p->next = *Left;
+//	return(res);
+//}
+
+void print(Node** Temp2, Node** L3)
+{
+	/*Node* Target = *Temp;
+	do {
+		if (Target == NULL)
+			break;
+		cout << Target->data.position << " " << Target->data.name << " " << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << " count: " << Target->data.count << endl;
+		Target = Target->next;
+		
+	} while (Target != *Temp);*/
+	Node* T = *Temp2;
+	do {
+		if (T == NULL)
+			break;
+		cout << T->data.position << " " << T->data.name << " " << T->data.hp << " " << T->data.ad << " " << T->data.armor << " count: " << T->data.count << endl;
+		T = T->next;
+
+	} while (T != NULL);
+}
+
