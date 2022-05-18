@@ -1,0 +1,307 @@
+#include <iostream>
+#include <fstream>
+#include <time.h>
+
+using namespace std;
+
+typedef struct Champ {
+	char position[20];
+	char name[20];
+	int hp;
+	int ad;
+	int armor;
+	int count;
+}Champ;
+
+typedef struct Node {
+	Champ data;
+	Node* next;
+}Node;
+
+void load(Node** Temp, int* count);
+Node* partition(Node** Temp, int mid);
+Node* Merge(Node** Head1, Node** Head2);
+void sortByName(Node** Temp, Node** Temp2, bool* check, int count, int count2);
+void print(Node** Temp, Node** Temp2);
+void print_SL(Node** Temp, double* compare_SL);
+void findName(Node** Temp, Node** Temp2, bool* check);
+void findName_SL(Node** Temp, double* compare_SL, char* findName);
+
+int main()
+{
+	Node* Temp = NULL;
+	Node* Temp2 = NULL;
+	int count = 0;
+	int count2 = 0;
+	load(&Temp, &count);
+	int number = 0;
+	bool check = false;
+	while (true)
+	{
+		cout << "번호: ";
+		rewind(stdin);
+		cin >> number;
+		if (cin.fail()) {
+			cout << "잘못된 문자가 입력되었습니다." << endl;
+			rewind(stdin);
+			cin.clear();
+			continue;
+		}
+		switch (number)
+		{
+		case 0:
+			cout << "시스템을 종료합니다." << endl;
+			exit(1);
+		case 1:
+			print(&Temp, &Temp2);
+			break;
+		case 2:
+			sortByName(&Temp, &Temp2, &check, count, count2);
+			break;
+		case 3:
+			findName(&Temp, &Temp2, &check);
+			break;
+		default:
+			cout << "잘못된 숫자를 입력하였습니다." << endl;
+			continue;
+		}
+	}
+}
+
+void load(Node** Temp, int* count)
+{
+	ifstream load("test.txt");
+	if (load.is_open()) {
+		Node* node = new Node;
+		load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
+		node->data.count = *count;
+		node->next = NULL;
+		*Temp = node;
+		Node* Tail = *Temp;
+		while (!load.eof())
+		{
+			Node* newnode = new Node;
+			load >> newnode->data.position >> newnode->data.name >> newnode->data.hp >> newnode->data.ad >> newnode->data.armor;
+			(*count)++;
+			newnode->data.count = *count;
+			newnode->next = *Temp;
+			Tail->next = newnode;
+			Tail = Tail->next;
+		}
+		Tail->next = NULL;
+	}
+	load.close();
+}
+
+Node* partition(Node** Head, int mid)
+{
+	if (mid == 0) {
+		(*Head)->next = NULL;
+		return *Head;
+	}
+	else if (mid == 1) {
+		if ((*Head)->next->next != NULL) {
+			int number = 0;
+			Node* center = (*Head)->next;
+			Node* last = (*Head)->next->next;
+			cout << "0. " << (*Head)->data.name << " " << center->data.name << " " << last->data.name << endl;
+			if (strcmp((*Head)->data.name, center->data.name) > 0) { //Head가 더 크면
+				center->next = *Head;
+				(*Head)->next = NULL;
+				Node* temp = *Head;
+				*Head = center;
+				center = temp;
+				number++;
+			}
+			if (number == 1) {
+				if (strcmp(center->data.name, last->data.name) > 0) {
+					last->next = center;
+					(*Head)->next = last;
+					center->next = NULL;
+					Node* temp = center;
+					center = last;
+					last = temp;
+				}
+				if (strcmp((*Head)->data.name, center->data.name) > 0) { //Head가 더 크면
+					center->next = *Head;
+					(*Head)->next = NULL;
+					Node* temp = *Head;
+					*Head = center;
+					center = temp;
+				}
+				cout << "1.Fi " << (*Head)->data.name << " " << center->data.name << " " << last->data.name << endl;
+			}
+			else {
+				if (strcmp(center->data.name, last->data.name) > 0) {
+					last->next = center;
+					(*Head)->next = last;
+					center->next = NULL;
+					Node* temp = center;
+					center = last;
+					last = temp;
+				}
+				cout << "2.Fi " << (*Head)->data.name << " " << center->data.name << " " << last->data.name << endl;
+			}
+		}
+		else {
+			Node* center = (*Head)->next;
+			cout << (*Head)->data.name << " " << center->data.name << endl;
+			if (strcmp((*Head)->data.name, center->data.name) > 0) {
+				center->next = *Head;
+				(*Head)->next = NULL;
+				Node* temp = *Head;
+				*Head = center;
+				center = temp;
+			}
+			cout << "3.Fi " << (*Head)->data.name << " " << center->data.name << endl;
+		}
+		return *Head;
+	}
+	else {
+		Node* cur = *Head;
+		for (int i = 0; i < mid; i++)
+			cur = cur->next;
+		Node* temp = cur->next;
+		cur->next = NULL;
+		cout << "L" << endl;
+		Node* merge_L = partition(Head, mid / 2);
+		cout << "R" << endl;
+		Node* merge_R = partition(&temp, mid / 2);
+		cout << "Merge" << endl;
+		return Merge(&merge_L, &merge_R);
+	}
+}
+
+Node* Merge(Node** Head1, Node** Head2)
+{
+	Node* merge_SL = NULL;
+	Node* returnHead = NULL;
+	int start = 0;
+	while (1)
+	{
+		if (*Head1 == NULL || *Head2 == NULL) {
+			if (*Head1 == NULL && *Head2 == NULL)
+				break;
+			else if (*Head1 == NULL) {
+				if (start == 0) {
+					start = 1;
+					returnHead = *Head2;
+					merge_SL = *Head2;
+				}
+				else {
+					merge_SL->next = *Head2;
+					merge_SL = merge_SL->next;
+				}
+				break;
+			}
+			else {
+				if (start == 0) {
+					start = 1;
+					returnHead = *Head1;
+					merge_SL = *Head1;
+				}
+				else {
+					merge_SL->next = *Head1;
+					merge_SL = merge_SL->next;
+				}
+				break;
+			}
+		}
+		else if (strcmp((*Head1)->data.name, (*Head2)->data.name) < 0) {
+			if (merge_SL == NULL) {
+				if (start == 0)
+					start = 1;
+				returnHead = *Head1;
+				merge_SL = *Head1;
+			}
+			else {
+				merge_SL->next = *Head1;
+				merge_SL = merge_SL->next;
+			}
+			*Head1 = (*Head1)->next;
+		}
+		else {
+			if (merge_SL == NULL) {
+				if (start == 0)
+					start = 1;
+				returnHead = *Head2;
+				merge_SL = *Head2;
+			}
+			else {
+				merge_SL->next = *Head2;
+				merge_SL = merge_SL->next;
+			}
+			*Head2 = (*Head2)->next;
+		}
+	}
+	return returnHead;
+}
+
+void sortByName(Node** Temp, Node** Temp2, bool* check, int count, int count2)
+{
+	clock_t start = clock();
+	*Temp = partition(Temp, count / 2);
+	clock_t end = clock();
+	*check = true;
+	cout << "소요시간(SL): " << (double)(end - start) / CLOCKS_PER_SEC << endl;
+}
+
+void print(Node** Temp, Node** Temp2)
+{
+	double compare_SL = 0;
+	print_SL(Temp, &compare_SL);
+	cout << "소요시간(SL): " << compare_SL << endl;
+}
+
+void print_SL(Node** Temp, double* compare_SL)
+{
+	Node* T = *Temp;
+	int count = 1;
+	clock_t start = clock();
+	do {
+		if (count % 1 == 0)
+			cout << T->data.position << " " << T->data.name << " " << T->data.hp << " " << T->data.ad << " " << T->data.armor << " count: " << T->data.count << endl;
+		T = T->next;
+		count++;
+	} while (T != NULL);
+	clock_t end = clock();
+	*compare_SL = (double)(end - start) / CLOCKS_PER_SEC;
+}
+
+void findName(Node** Temp, Node** Temp2, bool* check)
+{
+	if (!*check) {
+		cout << "정렬이 되지 않았습니다." << endl;
+		return;
+	}
+	else {
+		double compare_SL = 0;
+		char find_Name[20];
+		cout << "이름 검색: ";
+		rewind(stdin);
+		cin >> find_Name;
+		findName_SL(Temp, &compare_SL, find_Name);
+		cout << "소요시간(SL): " << compare_SL << endl;
+	}
+}
+
+void findName_SL(Node** Temp, double* compare_SL, char* find_Name)
+{
+	Node* Target = *Temp;
+	bool find = false;
+	clock_t start = clock();
+	while (Target != NULL)
+	{
+		if (!strcmp(find_Name, Target->data.name)) {
+			find = true;
+			cout << Target->data.name << " " << Target->data.position << " " << Target->data.hp << " " << Target->data.ad << " " << Target->data.armor << endl;
+			Target = Target->next;
+		}
+		else
+			Target = Target->next;
+	}
+	if (!find)
+		cout << "없는 챔피언입니다." << endl;
+	clock_t end = clock();
+	*compare_SL = (double)(end - start) / CLOCKS_PER_SEC;
+}
