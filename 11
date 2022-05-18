@@ -1,0 +1,203 @@
+#include <iostream>
+#include <time.h>
+#include <fstream>
+
+using namespace std;
+
+typedef struct Champ {
+	char position[20];
+	char name[20];
+	int hp;
+	int ad;
+	int armor;
+}Champ;
+
+typedef struct Node {
+	Champ data;
+	Node* left;
+	Node* right;
+};
+
+//Node* newNode(char* name);
+Node* search(Node* root, char* key);
+void Lo(Node** root, Node** Temp, Champ data);
+void set(Node** root, Node** Temp);
+//Node* delete_Tree(Node* root, int key);
+void print(Node* root);
+
+int main()
+{
+	Node* root = NULL;
+	Node* Temp = NULL;
+	set(&root, &Temp);
+	print(Temp);
+	/*char key[20];
+	cout << "찾을 챔피언의 이름을 입력하시오 :";
+	rewind(stdin);
+	cin >> key;*/
+	//Temp = search(root, key);
+}
+
+Node* search(Node* root, char* key)
+{
+	if (root == NULL) {
+		cout << "없음" << endl;
+		return root;
+	}		
+	else if (key == root->data.name)
+		return root;
+	else if (strcmp(key, root->data.name) > 0)
+		search(root->right, key);
+	else if (strcmp(key, root->data.name) < 0)
+		search(root->left, key);
+}
+
+//void Lo(Node** root, Node** Temp, Champ data)
+//{
+//	ifstream load("test.txt");
+//	if (load.is_open()) {
+//		while (!load.eof())
+//		{
+//			Node* newnode = new Node;
+//			load >> newnode->data.position >> newnode->data.name >> newnode->data.hp >> newnode->data.ad >> newnode->data.armor; //처음			
+//			if (*root == NULL) {
+//				newnode->left = newnode->right = NULL;
+//				*root = newnode;
+//				*Temp = newnode;
+//			}
+//			else {
+//				if (strcmp(newnode->data.name, (*root)->data.name) > 0) {
+//					if ((*root)->left == NULL)
+//						(*root)->left = newnode;
+//					else
+//						(*root) = (*root)->left;
+//				}
+//				else {
+//					if ((*root)->right == NULL)
+//						(*root)->right = newnode;
+//					else
+//						(*root) = (*root)->right;
+//				}
+//			}
+//		}
+//	}
+//	load.close();
+//}
+
+void set(Node** root, Node** Temp)
+{
+	ifstream load("test.txt");
+	if (load.is_open()) {
+		while (!load.eof()) 
+		{			
+			Node* newnode = new Node;
+			load >> newnode->data.position >> newnode->data.name >> newnode->data.hp >> newnode->data.ad >> newnode->data.armor; //처https://github.com/ggh0616/Index음			
+			if (*root == NULL) {					
+				newnode->left = newnode->right = NULL;
+				*root = newnode;
+				*Temp = newnode;
+			}
+			else {	
+				if (strcmp(newnode->data.name, (*root)->data.name) > 0) {
+					if ((*root)->left == NULL) {
+						(*root)->left = newnode;
+						newnode->left = newnode->right = NULL;
+					}		
+					else
+						(*root) = (*root)->left;
+				}
+				else {
+					if ((*root)->right == NULL) {
+						(*root)->right = newnode;
+						newnode->left = newnode->right = NULL;
+					}						
+					else
+						(*root) = (*root)->right;
+				}
+			}
+		}	
+	}
+	load.close();
+}
+
+//Node* delete_Tree(Node* root, int key)
+//{
+//	Node* del = NULL;
+//	Node* parent = NULL;
+//	Node* succ = NULL;
+//	Node* presucc = NULL;
+//	Node* child = NULL;
+//	del = root;
+//	while (del != NULL)
+//	{
+//		if (key == del->data)
+//			break;
+//		parent = del;
+//		if (key < del->data)
+//			del = del->left;
+//		else
+//			del = del->right;		
+//	}	
+//	if (del == NULL) {
+//		cout << "없음" << endl;
+//		return root;
+//	}
+//	if (del->left == NULL && del->right == NULL) {
+//		if (parent != NULL) {
+//			if (parent->left == del)
+//				parent->left = NULL;
+//			else
+//				parent->right = NULL;
+//		}
+//		else
+//			root = NULL;
+//	}
+//	else if (del->left != NULL && del->right != NULL) {
+//		presucc = del;
+//		succ = del->left;
+//		while (succ->right != NULL)
+//		{
+//			presucc = succ;
+//			succ = del->left;
+//		}
+//		presucc->right = succ->left;
+//		succ->left = del->left;
+//		succ->right = del->right;
+//		if (parent != NULL) {
+//			if (parent->left == del)
+//				parent->left = succ;
+//			else
+//				parent->right = succ;
+//		}
+//		else
+//			root = succ;
+//	}
+//	else {
+//		if (del->left != NULL)
+//			child = del->left;
+//		else
+//			child = del->right;
+//		if (parent != NULL) {
+//			if (parent->left == del)
+//				parent->left = child;
+//			else
+//				parent->right = child;
+//		}
+//		else
+//			root = child;
+//	}
+//	delete(del);
+//	return root;
+//}
+
+void print(Node* root)
+{
+	if (root->left != NULL) {
+		cout << root->data.position << " " << root->data.name << " " << root->data.hp << " " << root->data.ad << " " << root->data.armor << endl;
+		print(root->left);
+	}
+	if (root->right != NULL) {
+		cout << root->data.position << " " << root->data.name << " " << root->data.hp << " " << root->data.ad << " " << root->data.armor << endl;
+		print(root->left);
+	}
+}
