@@ -31,6 +31,7 @@ Node* delete_BST2(Node* root, char* name);
 Node* minName(Node* root);
 void sort(Node** root);
 void print(Node* root);
+void print_BST(Node* root);
 
 int main()
 {
@@ -39,7 +40,7 @@ int main()
 	preset(&root);
 	while (1)
 	{
-		cout << "0.종료 1.검색 2.추가 3.삭제 4.출력: ";
+		cout << "0.종료 1.검색 2.추가 3.삭제 4.출력 5.정렬: ";
 		rewind(stdin);
 		cin >> switch_number;
 
@@ -58,7 +59,10 @@ int main()
 			delete_Data(&root);
 			break;
 		case 4:
-			print(root);
+			print(root);			
+			break;
+		case 5:
+			sort(&root);
 			break;
 		default:
 			cout << "잘못된 수가 입력되었습니다. 다시 입력해주세요" << endl;
@@ -130,7 +134,10 @@ void insert_Data(Node** root)
 		cout << "정수가 아닌 값을 입력하였습니다." << endl;
 		return;
 	}
+	clock_t start = clock();
 	insert_BST(root, newnode);
+	clock_t end = clock();
+	cout << "수행시간: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 }
 
 void insert_BST(Node** root, Node* node)
@@ -163,7 +170,10 @@ void search_Data(Node** root)
 	cout << "검색할 챔피언의 이름을 입력하시오: ";
 	rewind(stdin);
 	cin >> name;
+	clock_t start = clock();
 	search_BST(*root, name);
+	clock_t end = clock();
+	cout << "수행시간: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 }
 
 void search_BST(Node* root, char* name)
@@ -191,7 +201,10 @@ void delete_Data(Node** root)
 	rewind(stdin);
 	cin >> name;
 	//delete_BST(*root, name);
+	clock_t start = clock();
 	*root = delete_BST2(*root, name);
+	clock_t end = clock();
+	cout << "수행시간: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 }
 
 void delete_BST(Node* root, char* name)
@@ -293,18 +306,29 @@ Node* minName(Node* root)
 
 void sort(Node** root)
 {
+	Node* first = *root;
+	first = minName(*root);
+	cout << first->data.name << endl;
+	
 }
 
 void print(Node* root)
 {
+	clock_t start = clock();
+	print_BST(root);
+	clock_t end = clock();
+	cout << "수행시간: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
+}
+
+void print_BST(Node* root)
+{	
 	if (root == NULL) {
 		cout << "데이터가 존재하지 않습니다." << endl;
 		return;
 	}	
-	if (root->left != NULL)
-		print(root->left);
-	cout << root->data.position << " " << root->data.name << " " << root->data.hp << " " << root->data.ad << " " << root->data.armor << endl;
 	if (root->right != NULL)
-		print(root->right);
-	
+		print_BST(root->right);
+	if (root->left != NULL)
+		print_BST(root->left);	
+	cout << root->data.position << " " << root->data.name << " " << root->data.hp << " " << root->data.ad << " " << root->data.armor << endl;
 }
