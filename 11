@@ -16,15 +16,20 @@ typedef struct Champ {
 typedef struct Node {
 	Champ data;
 	Node* left;
-Node* right;
+	Node* right;
 };
 
 void preset(Node** root);
 void set(Node** root, Node* node);
-void insert(Node** root);
+void insert_Data(Node** root);
 void insert_BST(Node** root, Node* node);
-void search(Node** root);
+void search_Data(Node** root);
 void search_BST(Node* root, char* name);
+void delete_Data(Node** root);
+void delete_BST(Node* root, char* name);
+Node* delete_BST2(Node* root, char* name);
+Node* minName(Node* root);
+void sort(Node** root);
 void print(Node* root);
 
 int main()
@@ -34,7 +39,7 @@ int main()
 	preset(&root);
 	while (1)
 	{
-		cout << "0.종료 1.검색 2.추가 4.출력: ";
+		cout << "0.종료 1.검색 2.추가 3.삭제 4.출력: ";
 		rewind(stdin);
 		cin >> switch_number;
 
@@ -44,10 +49,13 @@ int main()
 			cout << "종료합니다." << endl;
 			exit(1);
 		case 1:
-			search(&root);
+			search_Data(&root);
 			break;
 		case 2:
-			insert(&root);
+			insert_Data(&root);
+			break;
+		case 3:
+			delete_Data(&root);
 			break;
 		case 4:
 			print(root);
@@ -83,15 +91,15 @@ void set(Node** root, Node* node)
 	}
 	else {
 		if (strcmp((*root)->data.name, node->data.name) > 0) { //root가 추가할 노드보다 클 때
-			set(&(*root)->right, node);
+			set(&(*root)->left, node);
 		}
 		else {
-			set(&(*root)->left, node);
+			set(&(*root)->right, node);
 		}
 	}
 }
 
-void insert(Node** root)
+void insert_Data(Node** root)
 {
 	Node* newnode = new Node;
 	cout << "추가할 챔피언의 정보를 입력하시오" << endl;
@@ -104,12 +112,24 @@ void insert(Node** root)
 	cout << "hp: ";
 	rewind(stdin);
 	cin >> newnode->data.hp;
+	if (cin.fail()) {
+		cout << "정수가 아닌 값을 입력하였습니다." << endl;
+		return;
+	}
 	cout << "ad: ";
 	rewind(stdin);
 	cin >> newnode->data.ad;
+	if (cin.fail()) {
+		cout << "정수가 아닌 값을 입력하였습니다." << endl;
+		return;
+	}
 	cout << "armor: ";
 	rewind(stdin);
 	cin >> newnode->data.armor;
+	if (cin.fail()) {
+		cout << "정수가 아닌 값을 입력하였습니다." << endl;
+		return;
+	}
 	insert_BST(root, newnode);
 }
 
@@ -117,29 +137,27 @@ void insert_BST(Node** root, Node* node)
 {
 	if ((*root)->left == NULL && (*root)->right == NULL) {
 		if (strcmp((*root)->data.name, node->data.name) > 0) {
-			(*root)->right = node;
-			node->left = node->right = NULL;
-		}
-		else {
 			(*root)->left = node;
 			node->left = node->right = NULL;
 		}
-		
-	}	
-	else {
-		if (strcmp((*root)->data.name, node->data.name) > 0) {
-			insert_BST(&(*root)->right, node);
+		else {
+			(*root)->right = node;
+			node->left = node->right = NULL;
 		}
-			
+	}
+	else {
+		if (strcmp((*root)->data.name, node->data.name) > 0) 
+			insert_BST(&(*root)->left, node);		
 		else if (strcmp((*root)->data.name, node->data.name) < 0)
-			insert_BST(&(*root)->left, node);
+			insert_BST(&(*root)->right, node);
 		else if (strcmp((*root)->data.name, node->data.name) == 0) {
 			cout << "이미 동일한 이름의 데이터가 존재합니다." << endl;
+			return;
 		}
 	}
 }
 
-void search(Node** root)
+void search_Data(Node** root)
 {
 	char name[20];
 	cout << "검색할 챔피언의 이름을 입력하시오: ";
@@ -160,19 +178,133 @@ void search_BST(Node* root, char* name)
 	}
 	else {
 		if (strcmp(root->data.name, name) > 0)
-			search_BST(root->right, name);
-		else
 			search_BST(root->left, name);
+		else
+			search_BST(root->right, name);
 	}
 }
 
-void print(Node* root)
-{	
-	if (root->right != NULL) {
-		print(root->right);
-	}
-	if (root->left != NULL) {
-		print(root->left);
+void delete_Data(Node** root)
+{
+	char name[20];
+	cout << "삭제할 노드의 이름을 입력하시오: ";
+	rewind(stdin);
+	cin >> name;
+	//delete_BST(*root, name);
+	*root = delete_BST2(*root, name);
+}
+
+void delete_BST(Node* root, char* name)
+{
+	Node* p, * succ, * succ_par, * child;
+	Node* parent;
+	parent = NULL;
+	p = root;
+	int number = 0;
+	while (p != NULL && strcmp(p->data.name, name) != 0)
+	{
+		number++;
+		parent = p;
+		if (strcmp(p->data.name, name) > 0)
+			p = p->left;
+		else
+			p = p->right;
 	}	
-	cout << root->data.position << " " << root->data.name << " " << root->data.hp << " " << root->data.ad << " " << root->data.armor << endl;		
+	if (p == NULL) {
+		cout << "해당 챔피언은 존재하지 않습니다." << endl;
+		return;
+	}	
+	else if (p->left == NULL && p->right == NULL) {
+		if (parent != NULL) {
+			if (parent->left == p)
+				parent->left = NULL;
+			else
+				parent->right = NULL;
+		}
+		else
+			root = NULL;
+	}
+	else if (p->left == NULL || p->right == NULL) {
+		if (p->left != NULL)
+			child = p->left;
+		else
+			child = p->right;
+		if (parent != NULL) {
+			if (parent->left == p)
+				parent->left = child;
+			else
+				parent->right = child;
+		}
+		else {			
+			p = NULL;
+			root = child;
+		}
+			
+	}
+	else {
+		succ_par = p;
+		succ = p->left; //left에서 가장 큰값 찾기
+		while (succ->right != NULL)
+		{
+			succ_par = succ;
+			succ = succ->right;
+		}
+		if (succ_par->left == succ)
+			succ_par->left = succ->left;
+		else
+			succ_par->right = succ->left;
+		p = succ;
+	}
+}
+
+Node* delete_BST2(Node* root, char* name)
+{
+	if (root == NULL)
+		return root;
+	else if (strcmp(root->data.name, name) > 0)
+		root->left = delete_BST2(root->left, name);
+	else if (strcmp(root->data.name, name) < 0)
+		root->right = delete_BST2(root->right, name);
+	else {
+		if (root->left == NULL) {
+			Node* Temp = root->right;
+			delete(root);
+			return Temp;
+		}
+		else if (root->right == NULL) {
+			Node* Temp = root->left;
+			delete(root);
+			return Temp;
+		}
+		Node* Temp = minName(root->right);
+		root = Temp;
+		root->right = delete_BST2(root->right, Temp->data.name);
+	}
+	return root;
+}
+
+Node* minName(Node* root)
+{
+	Node* cur = root;
+	while (cur && cur->left != NULL)
+		cur = cur->left;
+	return cur;
+}
+
+void sort(Node** root)
+{
+}
+
+void print(Node* root)
+{
+	if (root == NULL) {
+		cout << "데이터가 존재하지 않습니다." << endl;
+		return;
+	}	
+	if (root->left != NULL)
+		print(root->left);
+	cout << root->data.position << " " << root->data.name << " " << root->data.hp << " " << root->data.ad << " " << root->data.armor << endl;
+	if (root->right != NULL)
+		print(root->right);
+	
 }
