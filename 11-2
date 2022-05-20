@@ -1,6 +1,6 @@
 #include <iostream>
-#include <fstream>
 #include <time.h>
+#include <fstream>
 
 using namespace std;
 
@@ -18,79 +18,82 @@ typedef struct Node {
 	Node* next;
 	Node* left;
 	Node* right;
-}Node;
+};
 
-void set_List(Node** Temp, int* count);
-void print_List(Node** Temp);
-void sort_List(Node** Temp, int* count);
+void load_SL(Node** Temp, int *count);
+void print_SL(Node** Temp);
+void sort_SL(Node** Temp, bool* check, int* count);
 Node* partition(Node** Head, int mid);
 Node* merge(Node** node1, Node** node2);
-void pre_Tree(Node** root);
-void Tree(Node** root, Node* node);
+void preset_BST(Node** root);
+void set_BST(Node** root, Node* node);
 void search_Data(Node* root);
 void search_BST(Node* root, char* name);
 void insert_Data(Node** root);
 void insert_BST(Node** root, Node* node);
 void delete_Data(Node** root);
 void delete_BST(Node** root, char* name);
-void print_Data(Node* root, bool* check);
-void print_BST(Node* root, bool* check);
-void sort_BST(Node* root, bool* check);
+void print_Data(Node* root, bool* sort);
+void print_BST(Node* root, bool* sort, int* count);
+void sort_BST(Node* root, bool* sort);
 
 int main()
 {
 	Node* Temp = NULL;
 	Node* root = NULL;
 	int count = 0;
-	set_List(&Temp, &count);
-	int number = 0;
 	bool check = false;
-	pre_Tree(&root);
-	while (1) 
+	bool sort = false;
+	load_SL(&Temp, &count);
+	int switch_number = 0;
+	while (1)
 	{
-		cout << "0.종료 1.정렬 2.출력 (리스트) | 3.검색 4.추가 5.삭제 6.출력 7.정렬: ";
+		cout << "0. 종료 1.정렬(리스트) 2.출력(리스트) | 3.트리설정 4.검색 5.추가 6.삭제 7.출력 8.정렬: ";
 		rewind(stdin);
-		cin >> number;
+		cin >> switch_number;
 		if (cin.fail()) {
 			cout << "잘못된 문자가 입력되었습니다." << endl;
-			cin.clear();
 			rewind(stdin);
+			cin.clear();
 			continue;
 		}
-		switch (number)
+		switch (switch_number)
 		{
 		case 0:
 			cout << "프로그램을 종료합니다." << endl;
 			exit(1);
 		case 1:
-			sort_List(&Temp, &count);
+			sort_SL(&Temp, &check, &count);
 			break;
 		case 2:
-			print_List(&Temp);
+			print_SL(&Temp);
 			break;
 		case 3:
-			search_Data(root);
+			preset_BST(&root);
 			break;
 		case 4:
-			insert_Data(&root);
+			search_Data(root);
 			break;
 		case 5:
-			delete_Data(&root);
+			insert_Data(&root);
 			break;
 		case 6:
-			print_Data(root, &check);
+			delete_Data(&root);
 			break;
 		case 7:
-			sort_BST(root, &check);
+			print_Data(root, &sort);
+			break;
+		case 8:
+			sort_BST(root, &sort);
 			break;
 		default:
-			cout << "잘못된 범위에 숫자가 입력되었습니다." << endl;
+			cout << "잘못된 숫자를 입력하였습니다. " << endl;
 			continue;
 		}
 	}
 }
 
-void set_List(Node** Temp, int* count)
+void load_SL(Node** Temp, int* count)
 {
 	ifstream load("test.txt");
 	if (load.is_open()) {
@@ -107,7 +110,7 @@ void set_List(Node** Temp, int* count)
 			(*count)++;
 			newnode->data.count = *count;
 			newnode->next = *Temp;
-			Tail->next = node;
+			Tail->next = newnode;
 			Tail = Tail->next;
 		}
 		Tail->next = NULL;
@@ -115,26 +118,27 @@ void set_List(Node** Temp, int* count)
 	load.close();
 }
 
-void print_List(Node** Temp)
+void print_SL(Node** Temp)
 {
 	Node* T = *Temp;
-	int count = 0;
+	int count = 1;
 	clock_t start = clock();
 	do {
-		if (count % 1 == 0)
+		if (count % 1 == 0) 
 			cout << T->data.position << " " << T->data.name << " " << T->data.hp << " " << T->data.ad << " " << T->data.armor << endl;
 		T = T->next;
-		(count)++;
+		count++;
 	} while (T != NULL);
 	clock_t end = clock();
 	cout << "수행시간: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 }
 
-void sort_List(Node** Temp, int* count)
+void sort_SL(Node** Temp, bool* check, int* count)
 {
 	clock_t start = clock();
 	*Temp = partition(Temp, *count / 2);
 	clock_t end = clock();
+	*check = true;
 	cout << "수행시간: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 }
 
@@ -142,19 +146,19 @@ Node* partition(Node** Head, int mid)
 {
 	if (mid == 0) {
 		(*Head)->next = NULL;
-		return *Head;		 
+		return *Head;
 	}
 	else if (mid == 1) {
 		if ((*Head)->next->next != NULL) {
+			int number = 0;
 			Node* center = (*Head)->next;
 			Node* last = (*Head)->next->next;
-			int number = 0;
-			if (strcmp((*Head)->data.name, center->data.name) > 0) {				
+			if (strcmp((*Head)->data.name, center->data.name) > 0) {
 				center->next = *Head;
 				(*Head)->next = NULL;
-				Node* Temp = (*Head);
+				Node* temp = *Head;
 				*Head = center;
-				center = Temp; 
+				center = temp;
 				number++;
 			}
 			if (number == 1) {
@@ -162,16 +166,16 @@ Node* partition(Node** Head, int mid)
 					last->next = center;
 					(*Head)->next = last;
 					center->next = NULL;
-					Node* Temp = center;
+					Node* temp = center;
 					center = last;
-					last = Temp;
+					last = temp;
 				}
 				if (strcmp((*Head)->data.name, center->data.name) > 0) {
 					center->next = *Head;
 					(*Head)->next = NULL;
-					Node* Temp = (*Head);
+					Node* temp = *Head;
 					*Head = center;
-					center = Temp;
+					center = temp;
 				}
 			}
 			else {
@@ -179,16 +183,16 @@ Node* partition(Node** Head, int mid)
 					last->next = center;
 					(*Head)->next = last;
 					center->next = NULL;
-					Node* Temp = center;
+					Node* temp = center;
 					center = last;
-					last = Temp;
+					last = temp;
 				}
 				if (strcmp((*Head)->data.name, center->data.name) > 0) {
 					center->next = *Head;
 					(*Head)->next = NULL;
-					Node* Temp = (*Head);
+					Node* temp = *Head;
 					*Head = center;
-					center = Temp;
+					center = temp;
 				}
 			}
 		}
@@ -197,20 +201,21 @@ Node* partition(Node** Head, int mid)
 			if (strcmp((*Head)->data.name, center->data.name) > 0) {
 				center->next = *Head;
 				(*Head)->next = NULL;
-				Node* Temp = (*Head);
+				Node* temp = *Head;
 				*Head = center;
-				center = Temp;
+				center = temp;
 			}
 		}
+		return *Head;
 	}
 	else {
 		Node* cur = *Head;
 		for (int i = 0; i < mid; i++)
 			cur = cur->next;
-		Node* Half = cur->next;
+		Node* temp = cur->next;
 		cur->next = NULL;
 		Node* merge_L = partition(Head, mid / 2);
-		Node* merge_R = partition(&Half, mid / 2);
+		Node* merge_R = partition(&temp, mid / 2);
 		return merge(&merge_L, &merge_R);
 	}
 }
@@ -224,8 +229,8 @@ Node* merge(Node** node1, Node** node2)
 	{
 		if (*node1 == NULL || *node2 == NULL) {
 			if (*node1 == NULL && *node2 == NULL)
-				break;		
-			if (*node1 == NULL) {
+				break;
+			else if (*node1 == NULL) {
 				if (start == 0) {
 					start = 1;
 					merge_SL = *node2;
@@ -248,9 +253,23 @@ Node* merge(Node** node1, Node** node2)
 					merge_SL = merge_SL->next;
 				}
 				break;
-			}				
-		}	
-		else if (strcmp((*node1)->data.name, (*node2)->data.name) > 0) {
+			}		
+		}
+		else if (strcmp((*node1)->data.name, (*node2)->data.name) < 0) {
+			if (merge_SL == NULL) {
+				if (start == 0) {
+					start = 1;
+					merge_SL = *node1;
+					returnNode = *node1;
+				}				
+			}
+			else {
+				merge_SL->next = *node1;
+				merge_SL = merge_SL->next;
+			}
+			*node1 = (*node1)->next;
+		}
+		else {
 			if (merge_SL == NULL) {
 				if (start == 0) {
 					start = 1;
@@ -264,39 +283,24 @@ Node* merge(Node** node1, Node** node2)
 			}
 			*node2 = (*node2)->next;
 		}
-		else {
-			if (merge_SL == NULL) {
-				if (start == 0) {
-					start = 1;
-					merge_SL = *node1;
-					returnNode = *node1;
-				}
-			}
-			else {
-				merge_SL->next = *node1;
-				merge_SL = merge_SL->next;
-			}
-			*node1 = (*node1)->next;
-		}
 	}
 	return returnNode;
 }
 
-void pre_Tree(Node** root)
+void preset_BST(Node** root)
 {
 	ifstream load("test.txt");
-	if (load.is_open()) {		
+	if (load.is_open()) {
 		while (!load.eof())
 		{
 			Node* node = new Node;
 			load >> node->data.position >> node->data.name >> node->data.hp >> node->data.ad >> node->data.armor;
-			Tree(root, node);
-		}		
+			set_BST(root, node);
+		}
 	}
-	load.close();
 }
 
-void Tree(Node** root, Node* node)
+void set_BST(Node** root, Node* node)
 {
 	if (*root == NULL) {
 		Node* newnode = new Node;
@@ -306,9 +310,9 @@ void Tree(Node** root, Node* node)
 	}
 	else {
 		if (strcmp((*root)->data.name, node->data.name) > 0)
-			Tree(&(*root)->left, node);
-		else
-			Tree(&(*root)->right, node);
+			set_BST(&(*root)->left, node);
+		else 
+			set_BST(&(*root)->right, node);
 	}
 }
 
@@ -322,10 +326,7 @@ void search_Data(Node* root)
 	cout << "검색할 챔피언의 이름을 입력하시오: ";
 	rewind(stdin);
 	cin >> name;
-	clock_t start = clock();
 	search_BST(root, name);
-	clock_t end = clock();
-	cout << "수행시간: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 }
 
 void search_BST(Node* root, char* name)
@@ -348,39 +349,23 @@ void search_BST(Node* root, char* name)
 
 void insert_Data(Node** root)
 {
-	if (*root == NULL) {
-		cout << "루트가 존재하지 않습니다." << endl;
-		return;
-	}
 	Node* node = new Node;
-	cout << "추가할 챔피언의 정보를 입력하시오" << endl;
-	cout << "position:";
+	cout << "챔피언의 정보를 입력하시오: ";
+	cout << "position: ";
 	rewind(stdin);
 	cin >> node->data.position;
-	cout << "name:";
+	cout << "name: ";
 	rewind(stdin);
 	cin >> node->data.name;
-	cout << "hp:";
+	cout << "hp: ";
 	rewind(stdin);
 	cin >> node->data.hp;
-	if (cin.fail()) {
-		cout << "숫자가 아닌 문자가 입력되었습니다." << endl;
-		return;
-	}
-	cout << "ad:";
+	cout << "ad: ";
 	rewind(stdin);
 	cin >> node->data.ad;
-	if (cin.fail()) {
-		cout << "숫자가 아닌 문자가 입력되었습니다." << endl;
-		return;
-	}
-	cout << "armor:";
+	cout << "armor: ";
 	rewind(stdin);
 	cin >> node->data.armor;
-	if (cin.fail()) {
-		cout << "숫자가 아닌 문자가 입력되었습니다." << endl;
-		return;
-	}
 	clock_t start = clock();
 	insert_BST(root, node);
 	clock_t end = clock();
@@ -402,19 +387,19 @@ void insert_BST(Node** root, Node* node)
 	else {
 		if (strcmp((*root)->data.name, node->data.name) > 0)
 			insert_BST(&(*root)->left, node);
-		else if (strcmp((*root)->data.name, node->data.name) < 0)
+		if (strcmp((*root)->data.name, node->data.name) < 0)
 			insert_BST(&(*root)->right, node);
 		else if (strcmp((*root)->data.name, node->data.name) == 0) {
 			cout << "이미 동일한 값이 존재합니다." << endl;
 			return;
 		}
 	}
-}
+ }
 
 void delete_Data(Node** root)
 {
 	if (*root == NULL) {
-		cout << "루트가 존재하지 않습니다." << endl;
+		cout << "트리가 존재하지 않습니다." << endl;
 		return;
 	}
 	char name[20];
@@ -451,13 +436,13 @@ void delete_BST(Node** root, char* name)
 				parent->right = NULL;
 		}
 		else
-			*root = NULL;
+			root = NULL;
 	}
 	else if (p->left == NULL || p->right == NULL) {
 		if (p->left != NULL)
-			child = p->left;
-		else
 			child = p->right;
+		else
+			child = p->left;
 		if (parent != NULL) {
 			if (parent->left == p)
 				parent->left = child;
@@ -466,7 +451,7 @@ void delete_BST(Node** root, char* name)
 		}
 		else
 			*root = child;
-	}
+	}	
 	else {
 		succ_parent = p;
 		succ = p->left;
@@ -475,7 +460,7 @@ void delete_BST(Node** root, char* name)
 			succ_parent = succ;
 			succ = succ->right;
 		}
-		if (succ_parent->left == succ)
+		if (succ_parent->left = succ)
 			succ_parent->left = succ->left;
 		else
 			succ_parent->right = succ->left;
@@ -485,44 +470,57 @@ void delete_BST(Node** root, char* name)
 	delete (p);
 }
 
-void print_Data(Node* root, bool* check)
+void print_Data(Node* root, bool* sort)
 {
 	if (root == NULL) {
 		cout << "트리가 존재하지 않습니다." << endl;
 		return;
 	}
+	int count = 0;
 	clock_t start = clock();
-	print_BST(root, check);
+	print_BST(root, sort, &count);
 	clock_t end = clock();
 	cout << "수행시간: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 }
 
-void print_BST(Node* root, bool* check)
-{	
-	if (!(*check)) {
-		if (root->left != NULL)
-			print_BST(root->left, check);
-		if (root->right != NULL)
-			print_BST(root->right, check);
+void print_BST(Node* root, bool* sort, int* count)
+{
+	if (root == NULL) {
+		cout << "트리가 존재하지 않습니다." << endl;
+		return;
+	}		
+	if (!(*sort)) {
+		if (root->left != NULL) {
+			(*count)++;
+			print_BST(root->left, sort, count);
+		}
+		if (root->right != NULL) {
+			(*count)++;
+			print_BST(root->right, sort, count);
+		}
 		cout << root->data.position << " " << root->data.name << " " << root->data.hp << " " << root->data.ad << " " << root->data.armor << endl;
 	}
 	else {
-		if (root->left != NULL)
-			print_BST(root->left, check);
+		if (root->left != NULL) {
+			(*count)++;
+			print_BST(root->left, sort, count);
+		}
 		cout << root->data.position << " " << root->data.name << " " << root->data.hp << " " << root->data.ad << " " << root->data.armor << endl;
-		if (root->right != NULL)
-			print_BST(root->right, check);
+		if (root->right != NULL) {
+			(*count)++;
+			print_BST(root->right, sort, count);
+		}		
 	}
 }
 
-void sort_BST(Node* root, bool* check)
+void sort_BST(Node* root, bool* sort)
 {
 	if (root == NULL) {
 		cout << "트리가 존재하지 않습니다." << endl;
 		return;
 	}
 	clock_t start = clock();
-	*check = true;
-	clock_t end = clock();
+	*sort = true;
+	clock_t end = clock();	
 	cout << "수행시간: " << (double)(end - start) / CLOCKS_PER_SEC << endl;
 }
